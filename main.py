@@ -1,6 +1,8 @@
-def main():
-    print("Hello from project-hotal!")
+from app.routers import router
+from fastapi import FastAPI
 
 
-if __name__ == "__main__":
-    main()
+app = FastAPI()
+
+
+app.include_router(router)

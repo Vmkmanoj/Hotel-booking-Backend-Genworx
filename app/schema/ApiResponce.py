@@ -5,7 +5,7 @@ class UserRegisterSuccess(BaseModel):
     success : bool
 
 class UserDetails(BaseModel):
-    userName : str
+    username : str
     emailId : str
     roles : str
 
