@@ -1,5 +1,6 @@
 import uuid
-from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey
+from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey 
+from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 
@@ -39,3 +40,5 @@ class User(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
+
+    properties = relationship("Property", back_populates= "owner")
