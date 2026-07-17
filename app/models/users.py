@@ -24,10 +24,11 @@ class User(Base):
     last_login_at = Column(DateTime(timezone=True))
 
     role_id = Column(
-        UUID(as_uuid=True),
-        ForeignKey("roles.id", ondelete="SET NULL"),
-        nullable=True,
-    )
+    "roleId",                   
+    UUID(as_uuid=True),
+    ForeignKey("roles.id", ondelete="SET NULL"),
+    nullable=True,
+)
 
     created_by = Column(String(100))
     updated_by = Column(String(100))
