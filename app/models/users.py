@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, Boolean, DateTime
+from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 
@@ -11,7 +11,6 @@ class User(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
-
     email = Column(String(255), unique=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
 
@@ -21,12 +20,21 @@ class User(Base):
     avatar_url = Column(String(500))
 
     is_active = Column(Boolean, default=True)
+
     last_login_at = Column(DateTime(timezone=True))
+
+    role_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("roles.id", ondelete="SET NULL"),
+        nullable=True,
+    )
 
     created_by = Column(String(100))
     updated_by = Column(String(100))
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-
-    roleId = Column(String(255),)
+    updated_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
