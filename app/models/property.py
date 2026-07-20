@@ -10,6 +10,10 @@ class Property(Base):
     id = Column(UUID(as_uuid=True), primary_key=True,default=uuid.uuid4)
     owner_id= Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     address_id= Column(UUID(as_uuid=True), ForeignKey("addresses.id"), nullable= False)
+    approved_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    approval_remarks = Column(Text, nullable=True)
+    approved_at = Column(DateTime, nullable=True)
+
     property_name= Column(String(255), nullable=False)
     description= Column(Text, nullable=True)
     property_type= Column(String(255), nullable=False)

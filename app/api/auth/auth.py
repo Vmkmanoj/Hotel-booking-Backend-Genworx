@@ -1,11 +1,8 @@
-from fastapi import APIRouter , Depends , HTTPException
+from fastapi import APIRouter , Depends 
 from app.database import get_db
 from sqlalchemy.orm import Session
 from app.schema.auth import CustomerRegister , PropertyRegister , RegisterResponse
-from app.models.roles import Role
 from app.schema.login import LoginRequest ,LoginResponse
-from app.models.users import User
-from app.utils.passwordhashing import hash_password 
 from app.services.auth_service import AuthService
 
 
