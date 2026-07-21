@@ -152,31 +152,31 @@ class Property(Base):
         uselist=False
     )
 
-    rooms = relationship(
-        "Room",
-        back_populates="property",
-        cascade="all, delete-orphan"
-    )
+    # rooms = relationship(
+    #     "Room",
+    #     back_populates="property",
+    #     cascade="all, delete-orphan"
+    # )
 
-    amenities = relationship(
-        "PropertyAmenity",
-        back_populates="property",
-        cascade="all, delete-orphan"
-    )
+    # amenities = relationship(
+    #     "PropertyAmenity",
+    #     back_populates="property",
+    #     cascade="all, delete-orphan"
+    # )
 
-    images = relationship(
-        "PropertyImage",
-        back_populates="property",
-        cascade="all, delete-orphan"
-    )
+    # images = relationship(
+    #     "PropertyImage",
+    #     back_populates="property",
+    #     cascade="all, delete-orphan"
+    # )
 
-    reviews = relationship(
-        "Review",
-        back_populates="property",
-        cascade="all, delete-orphan"
-    )
+    # reviews = relationship(
+    #     "Review",
+    #     back_populates="property",
+    #     cascade="all, delete-orphan"
+    # )
 
-    bookings = relationship(
-        "Booking",
-        back_populates="property"
-    )
+    # bookings = relationship(
+    #     "Booking",
+    #     back_populates="property"
+    # )
