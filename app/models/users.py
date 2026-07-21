@@ -25,20 +25,36 @@ class User(Base):
     last_login_at = Column(DateTime(timezone=True))
 
     role_id = Column(
-    "roleId",                   
-    UUID(as_uuid=True),
-    ForeignKey("roles.id", ondelete="SET NULL"),
-    nullable=True,
-)
+        "roleId",
+        UUID(as_uuid=True),
+        ForeignKey("roles.id", ondelete="SET NULL"),
+        nullable=True,
+    )
 
     created_by = Column(String(100))
     updated_by = Column(String(100))
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )
+
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
         onupdate=func.now(),
     )
 
-    properties = relationship("Property", back_populates= "owner")
+    # Properties owned by this user
+    properties = relationship(
+        "Property",
+        foreign_keys="Property.owner_id",
+        back_populates="owner"
+    )
+
+    # Properties approved by this admin
+    approved_properties = relationship(
+        "Property",
+        foreign_keys="Property.approved_by",
+        back_populates="approved_admin"
+    )

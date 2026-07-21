@@ -8,7 +8,6 @@ from app.schema.super_admin_schema import PendingPropertyResponse ,PropertyDetai
 
 
 
-
 superAdmin = APIRouter()
 
 @superAdmin.get(
