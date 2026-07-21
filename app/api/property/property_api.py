@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.schema.property_schema import  PropertyCreate, PropertyUpdate
-from app.services.property_service import PropertyService
+from app.services.property_service import PropertyService 
 
 
 propertyRouter = APIRouter()

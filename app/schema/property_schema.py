@@ -30,8 +30,14 @@ class PropertyBase(BaseModel):
 
 
 class PropertyCreate(PropertyBase):
-    owner_id: UUID 
-    address_id: UUID 
+    owner_id: UUID
+
+    address_line_1: str
+    address_line_2: str | None = None
+    city: str
+    state: str
+    country: str
+    postal_code: str
 
 
 class PropertyUpdate(BaseModel):

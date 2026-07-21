@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.models.property import Property
 from app.repositories.property_repository import PropertyRepository
 from app.schema.property_schema import PropertyCreate, PropertyUpdate
+from app.models.address import Address
 
 
 class PropertyService:
@@ -15,14 +16,44 @@ class PropertyService:
         db: Session,
         property_data: PropertyCreate
     ):
+
         try:
 
+            address = Address(
+                address_line_1=property_data.address_line_1,
+                address_line_2=property_data.address_line_2,
+                city=property_data.city,
+                state=property_data.state,
+                country=property_data.country,
+                postal_code=property_data.postal_code,
+                created_by=str(property_data.owner_id),
+                updated_by=str(property_data.owner_id),
+            )
+
             property_obj = Property(
-                **property_data.model_dump()
+                owner_id=property_data.owner_id,
+                property_name=property_data.property_name,
+                description=property_data.description,
+                property_type=property_data.property_type,
+                star_rating=property_data.star_rating,
+                contact_email=property_data.contact_email,
+                contact_number=property_data.contact_number,
+                cancellation_policy=property_data.cancellation_policy,
+                house_rules=property_data.house_rules,
+                child_policy=property_data.child_policy,
+                pet_policy=property_data.pet_policy,
+                smoking_policy=property_data.smoking_policy,
+                check_in_time=property_data.check_in_time,
+                check_out_time=property_data.check_out_time,
+                status="PENDING",
+                is_verified=False,
+                created_by=str(property_data.owner_id),
+                updated_by=str(property_data.owner_id),
             )
 
             property = PropertyRepository.create(
                 db=db,
+                address=address,
                 property_obj=property_obj
             )
 
@@ -31,10 +62,10 @@ class PropertyService:
                 "data": property
             }
 
-        except Exception:
+        except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to create property."
+                detail=str(e)
             )
 
     @staticmethod

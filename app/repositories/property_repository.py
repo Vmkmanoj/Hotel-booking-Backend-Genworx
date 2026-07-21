@@ -5,15 +5,25 @@ from sqlalchemy.orm import Session
 
 from app.models.property import Property
 from app.schema.property_schema import PropertyUpdate
+from app.models.address import Address
 
 
 class PropertyRepository:
 
     @staticmethod
-    def create(db: Session, property_obj: Property):
+    def create(db: Session, address: Address, property_obj: Property):
         try:
+            db.add(address)
+
+            db.flush()
+
+            property_obj.address_id = address.id
+
             db.add(property_obj)
+
             db.commit()
+
+            db.refresh(address)
             db.refresh(property_obj)
 
             return property_obj
@@ -22,6 +32,7 @@ class PropertyRepository:
             db.rollback()
             raise
 
+        
     @staticmethod
     def get_all(db: Session):
         try:

@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from app.models.property import Property
 from app.models.users import User
 from app.models.address import Address
+from datetime import datetime
 
 
 class SuperAdminPropertyRepository:
@@ -68,3 +69,64 @@ class SuperAdminPropertyRepository:
         self.db.refresh(property)
 
         return property
+    
+
+    def reject_property(
+        self,
+        property,
+        remarks,
+        admin_id=None
+    ):
+
+        property.status = "REJECTED"
+        property.is_verified = False
+        property.approval_remarks = remarks
+        property.approved_by = admin_id
+        property.approved_at = datetime.utcnow()
+
+        self.db.commit()
+        self.db.refresh(property)
+
+        return property
+
+
+    def suspend_property(
+        self,
+        property,
+        remarks,
+        admin_id=None
+    ):
+
+        property.status = "SUSPENDED"
+        property.approval_remarks = remarks
+        property.approved_by = admin_id
+
+        self.db.commit()
+        self.db.refresh(property)
+
+        return property
+
+
+    def activate_property(
+        self,
+        property,
+        remarks,
+        admin_id=None
+    ):
+
+        property.status = "APPROVED"
+        property.is_verified = True
+        property.approval_remarks = remarks
+        property.approved_by = admin_id
+
+        self.db.commit()
+        self.db.refresh(property)
+
+        return property
+
+
+    def delete_property(self, property):
+
+        property.is_deleted = True
+
+        self.db.commit()

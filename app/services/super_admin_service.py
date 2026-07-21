@@ -59,3 +59,127 @@ class SuperAdminPropertyService:
             success=True,
             message="Property approved successfully."
         )
+    
+
+    def reject_property(
+        self,
+        property_id,
+        request
+                ):
+
+        property = (
+            self.db.query(Property)
+            .filter(
+                Property.id == property_id,
+                not Property.is_deleted
+            )
+            .first()
+        )
+
+        if not property:
+            raise HTTPException(
+                status_code=404,
+                detail="Property not found"
+            )
+
+        self.repo.reject_property(
+            property,
+            request.remarks
+        )
+
+        return MessageResponse(
+            success=True,
+            message="Property rejected successfully."
+        )
+
+
+    def suspend_property(
+        self,
+        property_id,
+        request
+    ):
+
+        property = (
+            self.db.query(Property)
+            .filter(
+                Property.id == property_id,
+                not Property.is_deleted
+            )
+            .first()
+        )
+
+        if not property:
+            raise HTTPException(
+                status_code=404,
+                detail="Property not found"
+            )
+
+        self.repo.suspend_property(
+            property,
+            request.remarks
+        )
+
+        return MessageResponse(
+            success=True,
+            message="Property suspended successfully."
+        )
+
+
+    def activate_property(
+        self,
+        property_id,
+        request
+    ):
+
+        property = (
+            self.db.query(Property)
+            .filter(
+                Property.id == property_id,
+                not Property.is_deleted
+            )
+            .first()
+        )
+
+        if not property:
+            raise HTTPException(
+                status_code=404,
+                detail="Property not found"
+            )
+
+        self.repo.activate_property(
+            property,
+            request.remarks
+        )
+
+        return MessageResponse(
+            success=True,
+            message="Property activated successfully."
+        )
+
+
+    def delete_property(
+        self,
+        property_id
+    ):
+
+        property = (
+            self.db.query(Property)
+            .filter(
+                Property.id == property_id,
+                not Property.is_deleted
+            )
+            .first()
+        )
+
+        if not property:
+            raise HTTPException(
+                status_code=404,
+                detail="Property not found"
+            )
+
+        self.repo.delete_property(property)
+
+        return MessageResponse(
+            success=True,
+            message="Property deleted successfully."
+        )
