@@ -128,3 +128,20 @@ class AuthRepository:
         )
 
         return result.scalar_one_or_none()
+    
+
+    # ========================================================
+    # Update Password
+    # ========================================================
+
+    async def update_password(
+        self,
+        user: User,
+    ) -> None:
+        """
+        Persist the updated password.
+        """
+
+        await self.db.commit()
+
+        await self.db.refresh(user)

@@ -10,6 +10,8 @@ from app.modules.users.models import (
     User,
 )
 
+from app.modules.properties.models import Property
+
 __all__ = [
     "Base",
     "BaseModel",
@@ -20,4 +22,5 @@ __all__ = [
     "Role",
     "Permission",
     "RolePermission",
+    "Property",
 ]

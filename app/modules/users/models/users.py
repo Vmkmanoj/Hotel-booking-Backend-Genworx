@@ -10,7 +10,7 @@ from uuid import UUID
 # ============================================================
 # Third Party
 # ============================================================
-
+from sqlalchemy import Enum
 from sqlalchemy import Boolean, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -20,6 +20,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 # ============================================================
 
 from app.database.base_model import BaseModel
+from app.common.enums.user_status import UserStatus
 
 if TYPE_CHECKING:
     from app.modules.users.models.roles import Role
@@ -82,9 +83,12 @@ class User(BaseModel):
     # Account Status
     # ========================================================
 
-    is_active: Mapped[bool] = mapped_column(
-        Boolean,
-        default=True,
+    user_status: Mapped[UserStatus] = mapped_column(
+        Enum(
+            UserStatus,
+            name="user_status_enum",
+        ),
+        default=UserStatus.ACTIVE,
         nullable=False,
     )
 

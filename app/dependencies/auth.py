@@ -2,12 +2,21 @@
 # Third Party
 # ============================================================
 
-from fastapi import Depends, HTTPException, status
+from uuid import UUID
+
+from fastapi import (
+    Depends,
+    HTTPException,
+    status,
+)
+
 from fastapi.security import (
     HTTPAuthorizationCredentials,
     HTTPBearer,
 )
+
 from jose import JWTError
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # ============================================================
@@ -76,7 +85,9 @@ async def get_current_user(
 
     repository = AuthRepository(db)
 
-    user = await repository.get_user_by_id(user_id)
+    user = await repository.get_user_by_id(
+        UUID(payload["sub"]),
+    )
 
     if user is None:
         raise HTTPException(
@@ -84,10 +95,7 @@ async def get_current_user(
             detail="User not found.",
         )
 
-    if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User account is inactive.",
-        )
+    # Attach JWT payload for downstream dependencies
+    user.jwt_payload = payload
 
     return user

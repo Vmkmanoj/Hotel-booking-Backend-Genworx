@@ -27,6 +27,7 @@ from app.modules.auth.auth_constants import (
     PROPERTY_OWNER,
     CUSTOMER,
 )
+from app.common.enums.user_status import UserStatus
 
 
 # ============================================================
@@ -105,7 +106,7 @@ async def seed_roles() -> None:
                 email=admin_email,
                 password_hash=hash_password("Admin@123"),
                 role_id=role_map[SUPER_ADMIN].id,
-                is_active=True,
+                user_status=UserStatus.ACTIVE,
             )
 
             db.add(admin)

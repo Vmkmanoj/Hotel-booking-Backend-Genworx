@@ -123,8 +123,12 @@ class MessageResponse(BaseModel):
 # ============================================================
 
 class RefreshTokenRequest(BaseModel):
-    refresh_token: str
+    """
+    Request schema for generating
+    a new access token.
+    """
 
+    refresh_token: str
 
 # ============================================================
 # Forgot Password
@@ -193,3 +197,18 @@ class UserResponse(BaseModel):
     profile_image_url: str | None
 
     role: str
+
+
+# ============================================================
+# Change Password
+# ============================================================
+
+class ChangePasswordRequest(BaseModel):
+    """
+    Request schema for changing
+    the current user's password.
+    """
+
+    current_password: str
+
+    new_password: str

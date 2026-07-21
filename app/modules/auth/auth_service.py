@@ -2,12 +2,14 @@
 # Third Party
 # ============================================================
 
+from jose import JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # ============================================================
 # Local Imports
 # ============================================================
 
+from app.core.config import settings
 from app.core.jwt import (
     create_access_token,
     create_refresh_token,
@@ -39,8 +41,7 @@ from app.modules.auth.auth_schemas import (
 )
 
 from app.modules.users.models.users import User
-
-from app.core.config import settings
+from app.common.enums.user_status import UserStatus
 
 
 class AuthService:
@@ -59,14 +60,14 @@ class AuthService:
     ) -> MessageResponse:
 
         existing_user = await self.repository.get_user_by_email(
-            request.email
+            request.email,
         )
 
         if existing_user:
             raise UserAlreadyExistsException()
 
         role = await self.repository.get_role_by_name(
-            CUSTOMER
+            CUSTOMER,
         )
 
         if role is None:
@@ -84,7 +85,7 @@ class AuthService:
         await self.repository.create_user(user)
 
         return MessageResponse(
-            message="Customer registered successfully."
+            message="Customer registered successfully.",
         )
 
     # ========================================================
@@ -97,14 +98,14 @@ class AuthService:
     ) -> MessageResponse:
 
         existing_user = await self.repository.get_user_by_email(
-            request.email
+            request.email,
         )
 
         if existing_user:
             raise UserAlreadyExistsException()
 
         role = await self.repository.get_role_by_name(
-            PROPERTY_OWNER
+            PROPERTY_OWNER,
         )
 
         if role is None:
@@ -118,13 +119,13 @@ class AuthService:
             profile_image_url=request.profile_image_url,
             password_hash=hash_password(request.password),
             role_id=role.id,
-            is_active=True,
+            user_status=UserStatus.ACTIVE,
         )
 
         await self.repository.create_user(user)
 
         return MessageResponse(
-            message="Property owner registered successfully."
+            message="Property owner registered successfully.",
         )
 
     # ========================================================
@@ -138,7 +139,7 @@ class AuthService:
     ) -> AuthResponse:
 
         user = await self.repository.get_user_by_email(
-            email
+            email,
         )
 
         if user is None:
@@ -150,8 +151,11 @@ class AuthService:
         ):
             raise InvalidCredentialsException()
 
+        if user.user_status != UserStatus.ACTIVE:
+            raise InvalidCredentialsException()
+
         role = await self.repository.get_role_by_id(
-            user.role_id
+            user.role_id,
         )
 
         if role is None:
@@ -173,7 +177,6 @@ class AuthService:
             expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
             role=role.name,
         )
-    
 
     # ========================================================
     # Refresh Access Token
@@ -187,9 +190,13 @@ class AuthService:
         Validate a refresh token and generate a new access token.
         """
 
-        payload = decode_token(refresh_token)
+        try:
+            payload = decode_token(refresh_token)
 
-        if payload.get("type") != "refresh":   
+        except JWTError:
+            raise InvalidCredentialsException()
+
+        if payload.get("type") != "refresh":
             raise InvalidCredentialsException()
 
         user = await self.repository.get_user_by_id(
@@ -199,7 +206,7 @@ class AuthService:
         if user is None:
             raise InvalidCredentialsException()
 
-        if not user.is_active:
+        if user.user_status != UserStatus.ACTIVE:
             raise InvalidCredentialsException()
 
         role = await self.repository.get_role_by_id(
@@ -220,4 +227,53 @@ class AuthService:
             token_type="Bearer",
             expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
             role=role.name,
+        )
+    
+    # ========================================================
+    # Change Password
+    # ========================================================
+
+    async def change_password(
+        self,
+        current_user: User,
+        current_password: str,
+        new_password: str,
+    ) -> MessageResponse:
+        """
+        Change the authenticated user's password.
+        """
+
+        if not verify_password(
+            current_password,
+            current_user.password_hash,
+        ):
+            raise InvalidCredentialsException()
+
+        current_user.password_hash = hash_password(
+            new_password,
+        )
+
+        await self.repository.update_password(
+            current_user,
+        )
+
+        return MessageResponse(
+            message="Password changed successfully.",
+        )
+    
+    # ========================================================
+    # Logout
+    # ========================================================
+
+    async def logout(self) -> MessageResponse:
+        """
+        Stateless JWT logout.
+
+        The backend does not store JWTs.
+        The client is responsible for
+        removing both access and refresh tokens.
+        """
+
+        return MessageResponse(
+            message="Logged out successfully.",
         )

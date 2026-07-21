@@ -15,10 +15,12 @@ from app.modules.users.models.users import User
 
 from app.modules.auth.auth_schemas import (
     AuthResponse,
+    ChangePasswordRequest,
     CustomerRegisterRequest,
     LoginRequest,
     MessageResponse,
     PropertyOwnerRegisterRequest,
+    RefreshTokenRequest,
 )
 
 from app.modules.auth.auth_service import AuthService
@@ -108,5 +110,80 @@ async def get_me(
         "last_name": current_user.last_name,
         "email": current_user.email,
         "role_id": str(current_user.role_id),
-        "is_active": current_user.is_active,
+        "user_status": current_user.user_status,
     }
+
+
+
+# ============================================================
+# Refresh Access Token
+# ============================================================
+
+@router.post(
+    "/refresh-token",
+    response_model=AuthResponse,
+)
+async def refresh_access_token(
+    request: RefreshTokenRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Generate a new access token
+    using a valid refresh token.
+    """
+
+    service = AuthService(db)
+
+    return await service.refresh_access_token(
+        request.refresh_token,
+    )
+
+
+# ============================================================
+# Change Password
+# ============================================================
+
+@router.post(
+    "/change-password",
+    response_model=MessageResponse,
+)
+async def change_password(
+    request: ChangePasswordRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Change the password of the authenticated user.
+    """
+
+    service = AuthService(db)
+
+    return await service.change_password(
+        current_user=current_user,
+        current_password=request.current_password,
+        new_password=request.new_password,
+    )
+
+# ============================================================
+# Logout
+# ============================================================
+
+@router.post(
+    "/logout",
+    response_model=MessageResponse,
+)
+async def logout(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Logout the authenticated user.
+
+    Since JWT authentication is stateless,
+    the backend simply validates the user
+    and returns a success response.
+    """
+
+    service = AuthService(db)
+
+    return await service.logout()
