@@ -1,4 +1,6 @@
 from fastapi import HTTPException
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.property import Property
 from app.repositories.super_admin_repository import (
@@ -12,18 +14,18 @@ from app.schema.super_admin_schema import (
 
 class SuperAdminPropertyService:
 
-    def __init__(self, db):
+    def __init__(self, db: AsyncSession):
 
         self.db = db
         self.repo = SuperAdminPropertyRepository(db)
 
-    def get_pending_properties(self):
+    async def get_pending_properties(self):
 
-        return self.repo.get_pending_properties()
+        return await self.repo.get_pending_properties()
     
-    def get_all_approved_property(self):
+    async def get_all_approved_property(self):
 
-        property = self.repo.get_approve_property()
+        property = await self.repo.get_approve_property()
          
         if not property:
             raise HTTPException(
@@ -34,9 +36,9 @@ class SuperAdminPropertyService:
         return property
          
 
-    def get_property(self, property_id):
+    async def get_property(self, property_id):
 
-        property = self.repo.get_property_by_id(property_id)
+        property = await self.repo.get_property_by_id(property_id)
 
         if not property:
             raise HTTPException(
@@ -46,13 +48,11 @@ class SuperAdminPropertyService:
 
         return property
 
-    def approve_property(self, property_id, request):
+    async def approve_property(self, property_id, request):
 
-        property = (
-            self.db.query(Property)
-            .filter(Property.id == property_id)
-            .first()
-        )
+        property = (await self.db.execute(
+            select(Property).where(Property.id == property_id)
+        )).scalar_one_or_none()
 
         if not property:
             raise HTTPException(
@@ -66,7 +66,7 @@ class SuperAdminPropertyService:
                 detail="Property already approved"
             )
 
-        self.repo.approve_property(property)
+        await self.repo.approve_property(property)
 
         return MessageResponse(
             success=True,
@@ -74,20 +74,18 @@ class SuperAdminPropertyService:
         )
     
 
-    def reject_property(
+    async def reject_property(
         self,
         property_id,
         request
                 ):
 
-        property = (
-            self.db.query(Property)
-            .filter(
+        property = (await self.db.execute(
+            select(Property).where(
                 Property.id == property_id,
-                not Property.is_deleted
+                Property.is_deleted.is_(False),
             )
-            .first()
-        )
+        )).scalar_one_or_none()
 
         if not property:
             raise HTTPException(
@@ -95,7 +93,7 @@ class SuperAdminPropertyService:
                 detail="Property not found"
             )
 
-        self.repo.reject_property(
+        await self.repo.reject_property(
             property,
             request.remarks
         )
@@ -106,20 +104,18 @@ class SuperAdminPropertyService:
         )
 
 
-    def suspend_property(
+    async def suspend_property(
         self,
         property_id,
         request
     ):
 
-        property = (
-            self.db.query(Property)
-            .filter(
+        property = (await self.db.execute(
+            select(Property).where(
                 Property.id == property_id,
-                not Property.is_deleted
+                Property.is_deleted.is_(False),
             )
-            .first()
-        )
+        )).scalar_one_or_none()
 
         if not property:
             raise HTTPException(
@@ -127,7 +123,7 @@ class SuperAdminPropertyService:
                 detail="Property not found"
             )
 
-        self.repo.suspend_property(
+        await self.repo.suspend_property(
             property,
             request.remarks
         )
@@ -138,20 +134,18 @@ class SuperAdminPropertyService:
         )
 
 
-    def activate_property(
+    async def activate_property(
         self,
         property_id,
         request
     ):
 
-        property = (
-            self.db.query(Property)
-            .filter(
+        property = (await self.db.execute(
+            select(Property).where(
                 Property.id == property_id,
-                not Property.is_deleted
+                Property.is_deleted.is_(False),
             )
-            .first()
-        )
+        )).scalar_one_or_none()
 
         if not property:
             raise HTTPException(
@@ -159,7 +153,7 @@ class SuperAdminPropertyService:
                 detail="Property not found"
             )
 
-        self.repo.activate_property(
+        await self.repo.activate_property(
             property,
             request.remarks
         )
@@ -170,19 +164,17 @@ class SuperAdminPropertyService:
         )
 
 
-    def delete_property(
+    async def delete_property(
         self,
         property_id
     ):
 
-        property = (
-            self.db.query(Property)
-            .filter(
+        property = (await self.db.execute(
+            select(Property).where(
                 Property.id == property_id,
-                not Property.is_deleted
+                Property.is_deleted.is_(False),
             )
-            .first()
-        )
+        )).scalar_one_or_none()
 
         if not property:
             raise HTTPException(
@@ -190,7 +182,7 @@ class SuperAdminPropertyService:
                 detail="Property not found"
             )
 
-        self.repo.delete_property(property)
+        await self.repo.delete_property(property)
 
         return MessageResponse(
             success=True,

@@ -1,7 +1,8 @@
 from uuid import UUID
 
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.property import Property
 from app.schema.property_schema import PropertyUpdate
@@ -11,63 +12,59 @@ from app.models.address import Address
 class PropertyRepository:
 
     @staticmethod
-    def create(db: Session, address: Address, property_obj: Property):
+    async def create(db: AsyncSession, address: Address, property_obj: Property):
         try:
             db.add(address)
 
-            db.flush()
+            await db.flush()
 
             property_obj.address_id = address.id
 
             db.add(property_obj)
 
-            db.commit()
+            await db.commit()
 
-            db.refresh(address)
-            db.refresh(property_obj)
+            await db.refresh(address)
+            await db.refresh(property_obj)
 
             return property_obj
 
         except SQLAlchemyError:
-            db.rollback()
+            await db.rollback()
             raise
 
         
     @staticmethod
-    def get_all(db: Session):
+    async def get_all(db: AsyncSession):
         try:
-            return db.query(Property).all()
+            return (await db.execute(select(Property))).scalars().all()
 
         except SQLAlchemyError:
             raise
 
     @staticmethod
-    def get_by_owner_id(db: Session, owner_id: UUID):
+    async def get_by_owner_id(db: AsyncSession, owner_id: UUID):
         try:
-            return (
-                db.query(Property)
-                .filter(Property.owner_id == owner_id)
-                .all()
-            )
+            return (await db.execute(
+                select(Property).where(Property.owner_id == owner_id)
+            )).scalars().all()
 
         except SQLAlchemyError:
             raise
 
     @staticmethod
-    def get_by_id(db: Session, property_id: UUID):
+    async def get_by_id(db: AsyncSession, property_id: UUID):
         try:
-            return (
-                db.query(Property)
-                .filter(Property.id == property_id)
-                .first()
-            )
+            return (await db.execute(
+                select(Property).where(Property.id == property_id)
+            )).scalar_one_or_none()
 
         except SQLAlchemyError:
             raise
 
     @staticmethod
-    def update(
-        db: Session,
+    async def update(
+        db: AsyncSession,
         property_obj: Property,
         property_data: PropertyUpdate
     ):
@@ -78,54 +75,54 @@ class PropertyRepository:
             for key, value in update_data.items():
                 setattr(property_obj, key, value)
 
-            db.commit()
-            db.refresh(property_obj)
+            await db.commit()
+            await db.refresh(property_obj)
 
             return property_obj
 
         except SQLAlchemyError:
-            db.rollback()
+            await db.rollback()
             raise
 
     @staticmethod
-    def archive(db: Session, property_obj: Property):
+    async def archive(db: AsyncSession, property_obj: Property):
         try:
 
             property_obj.status = "Archived"
 
-            db.commit()
-            db.refresh(property_obj)
+            await db.commit()
+            await db.refresh(property_obj)
 
             return property_obj
 
         except SQLAlchemyError:
-            db.rollback()
+            await db.rollback()
             raise
 
     @staticmethod
-    def submit_for_review(db: Session, property_obj: Property):
+    async def submit_for_review(db: AsyncSession, property_obj: Property):
         try:
 
             property_obj.status = "Pending Review"
 
-            db.commit()
-            db.refresh(property_obj)
+            await db.commit()
+            await db.refresh(property_obj)
 
             return property_obj
 
         except SQLAlchemyError:
-            db.rollback()
+            await db.rollback()
             raise
 
     @staticmethod
-    def delete(db: Session, property_obj: Property):
+    async def delete(db: AsyncSession, property_obj: Property):
         try:
 
-            db.delete(property_obj)
-            db.commit()
+            await db.delete(property_obj)
+            await db.commit()
 
             return True
 
         except SQLAlchemyError:
-            db.rollback()
+            await db.rollback()
             raise

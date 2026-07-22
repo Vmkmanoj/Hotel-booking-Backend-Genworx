@@ -1,4 +1,6 @@
 from fastapi import HTTPException
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.favorites import Favorite
 from app.models.property import Property
@@ -11,23 +13,16 @@ from app.schema.favorite_schema import FavoriteResponse
 class FavoriteService:
 
     @staticmethod
-    def add_favorite(
-        db,
+    async def add_favorite(
+        db: AsyncSession,
         user_id,
         property_id
     ):
-        print("userId",user_id)
-        print("propertyId",property_id)
-
-        property = (
-        db.query(Property)
-        .filter(
+        property = (await db.execute(select(Property).where(
             Property.id == property_id,
-            Property.is_deleted == False,
-            Property.status == "APPROVED"
-        )
-        .first()
-        )
+            Property.is_deleted.is_(False),
+            Property.status == "APPROVED",
+        ))).scalar_one_or_none()
 
         if not property:
             raise HTTPException(
@@ -35,7 +30,7 @@ class FavoriteService:
                 detail="Property not found."
             )
 
-        favorite = FavoriteRepository.get_by_user_and_property(
+        favorite = await FavoriteRepository.get_by_user_and_property(
             db,
             user_id,
             property_id
@@ -54,7 +49,7 @@ class FavoriteService:
             updated_by=str(user_id),
         )
 
-        FavoriteRepository.create(
+        await FavoriteRepository.create(
             db,
             favorite
         )
@@ -66,12 +61,12 @@ class FavoriteService:
     
 
     @staticmethod
-    def remove_favorite(
-        db,
+    async def remove_favorite(
+        db: AsyncSession,
         user_id,
         property_id,
     ):
-        favorite = FavoriteRepository.get_by_user_and_property(
+        favorite = await FavoriteRepository.get_by_user_and_property(
             db=db,
             user_id=user_id,
             property_id=property_id,
@@ -83,7 +78,7 @@ class FavoriteService:
                 detail="Favorite not found."
             )
 
-        FavoriteRepository.delete(
+        await FavoriteRepository.delete(
             db=db,
             favorite=favorite
         )

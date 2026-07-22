@@ -1,4 +1,5 @@
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.property import Property
 from app.models.users import User
 from app.models.address import Address
@@ -7,13 +8,13 @@ from datetime import datetime
 
 class SuperAdminPropertyRepository:
 
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
 
-    def get_pending_properties(self):
+    async def get_pending_properties(self):
 
-        return (
-            self.db.query(
+        result = await self.db.execute(
+            select(
                 Property.id,
                 Property.property_name,
                 User.first_name.label("owner_name"),
@@ -25,15 +26,15 @@ class SuperAdminPropertyRepository:
             )
             .join(User, Property.owner_id == User.id)
             .join(Address, Property.address_id == Address.id)
-            .filter(Property.status == "PENDING")
+            .where(Property.status == "PENDING")
             .order_by(Property.created_at.desc())
-            .all()
         )
+        return result.all()
 
-    def get_property_by_id(self, property_id):
+    async def get_property_by_id(self, property_id):
 
-        return (
-            self.db.query(
+        result = await self.db.execute(
+            select(
                 Property.id,
                 Property.property_name,
                 Property.description,
@@ -56,29 +57,26 @@ class SuperAdminPropertyRepository:
             )
             .join(User, Property.owner_id == User.id)
             .join(Address, Property.address_id == Address.id)
-            .filter(Property.id == property_id)
-            .first()
+            .where(Property.id == property_id)
         )
+        return result.first()
 
-    def approve_property(self, property):
+    async def approve_property(self, property):
 
         property.status = "APPROVED"
         property.is_verified = True
 
-        self.db.commit()
-        self.db.refresh(property)
+        await self.db.commit()
+        await self.db.refresh(property)
 
         return property
     
-    def get_approve_property(self):
-        return (
-            self.db.query(Property)
-            .filter(Property.status == "APPROVED")
-            .all()
-        )
+    async def get_approve_property(self):
+        result = await self.db.execute(select(Property).where(Property.status == "APPROVED"))
+        return result.scalars().all()
     
 
-    def reject_property(
+    async def reject_property(
         self,
         property,
         remarks,
@@ -91,13 +89,13 @@ class SuperAdminPropertyRepository:
         property.approved_by = admin_id
         property.approved_at = datetime.utcnow()
 
-        self.db.commit()
-        self.db.refresh(property)
+        await self.db.commit()
+        await self.db.refresh(property)
 
         return property
 
 
-    def suspend_property(
+    async def suspend_property(
         self,
         property,
         remarks,
@@ -108,13 +106,13 @@ class SuperAdminPropertyRepository:
         property.approval_remarks = remarks
         property.approved_by = admin_id
 
-        self.db.commit()
-        self.db.refresh(property)
+        await self.db.commit()
+        await self.db.refresh(property)
 
         return property
 
 
-    def activate_property(
+    async def activate_property(
         self,
         property,
         remarks,
@@ -126,14 +124,14 @@ class SuperAdminPropertyRepository:
         property.approval_remarks = remarks
         property.approved_by = admin_id
 
-        self.db.commit()
-        self.db.refresh(property)
+        await self.db.commit()
+        await self.db.refresh(property)
 
         return property
 
 
-    def delete_property(self, property):
+    async def delete_property(self, property):
 
         property.is_deleted = True
 
-        self.db.commit()
+        await self.db.commit()

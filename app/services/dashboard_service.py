@@ -7,16 +7,16 @@ class DashboardService:
     def __init__(self, db):
         self.repo = DashboardRepository(db)
 
-    def get_dashboard(self):
+    async def get_dashboard(self):
 
         return DashboardResponse(
-            total_users=self.repo.total_users(),
-            total_customers=self.repo.total_customers(),
-            total_property_owners=self.repo.total_property_owners(),
-            total_admins=self.repo.total_admins(),
+            total_users=await self.repo.total_users(),
+            total_customers=await self.repo.total_customers(),
+            total_property_owners=await self.repo.total_property_owners(),
+            total_admins=await self.repo.total_admins(),
 
-            total_properties=self.repo.total_properties(),
-            pending_properties=self.repo.pending_properties(),
-            approved_properties=self.repo.approved_properties(),
-            rejected_properties=self.repo.rejected_properties(),
+            total_properties=await self.repo.total_properties(),
+            pending_properties=await self.repo.pending_properties(),
+            approved_properties=await self.repo.approved_properties(),
+            rejected_properties=await self.repo.rejected_properties(),
         )

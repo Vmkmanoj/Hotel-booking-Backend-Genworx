@@ -15,4 +15,4 @@ dashboardRouter = APIRouter()
 async def dashboard(
     db: AsyncSession = Depends(get_db)
 ):
-    return await db.run_sync(lambda s: DashboardService(s).get_dashboard())
+    return await DashboardService(db).get_dashboard()

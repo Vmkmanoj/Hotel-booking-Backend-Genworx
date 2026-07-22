@@ -1,4 +1,5 @@
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.address import Address
 from app.schema.address import AddressCreate, AddressUpdate
@@ -7,63 +8,61 @@ from app.schema.address import AddressCreate, AddressUpdate
 class AddressRepository:
 
     @staticmethod
-    def create(db: Session, address_data: AddressCreate):
+    async def create(db: AsyncSession, address_data: AddressCreate):
         try:
             address = Address(**address_data.model_dump())
 
             db.add(address)
-            db.commit()
-            db.refresh(address)
+            await db.commit()
+            await db.refresh(address)
 
             return address
 
         except Exception:
-            db.rollback()
+            await db.rollback()
             raise
 
     @staticmethod
-    def get_all(db: Session):
+    async def get_all(db: AsyncSession):
         try:
-            return db.query(Address).all()
+            return (await db.execute(select(Address))).scalars().all()
 
         except Exception:
             raise
 
     @staticmethod
-    def get_by_id(db: Session, address_id):
+    async def get_by_id(db: AsyncSession, address_id):
         try:
-            return (
-                db.query(Address)
-                .filter(Address.id == address_id)
-                .first()
-            )
+            return (await db.execute(
+                select(Address).where(Address.id == address_id)
+            )).scalar_one_or_none()
 
         except Exception:
             raise
 
     @staticmethod
-    def update(db: Session, address: Address, address_data: AddressUpdate):
+    async def update(db: AsyncSession, address: Address, address_data: AddressUpdate):
         try:
             update_data = address_data.model_dump(exclude_unset=True)
 
             for key, value in update_data.items():
                 setattr(address, key, value)
 
-            db.commit()
-            db.refresh(address)
+            await db.commit()
+            await db.refresh(address)
 
             return address
 
         except Exception:
-            db.rollback()
+            await db.rollback()
             raise
 
     @staticmethod
-    def delete(db: Session, address: Address):
+    async def delete(db: AsyncSession, address: Address):
         try:
-            db.delete(address)
-            db.commit()
+            await db.delete(address)
+            await db.commit()
 
         except Exception:
-            db.rollback()
+            await db.rollback()
             raise

@@ -18,7 +18,7 @@ superAdmin = APIRouter()
 async def pending_properties(
     db: AsyncSession = Depends(get_db),
 ):
-    return await db.run_sync(lambda s: SuperAdminPropertyService(s).get_pending_properties())
+    return await SuperAdminPropertyService(db).get_pending_properties()
 
 
 @superAdmin.get(
@@ -29,7 +29,7 @@ async def property_detail(
     property_id: UUID,
     db: AsyncSession = Depends(get_db),
 ):
-    return await db.run_sync(lambda s: SuperAdminPropertyService(s).get_property(property_id))
+    return await SuperAdminPropertyService(db).get_property(property_id)
 
 
 @superAdmin.patch(
@@ -41,7 +41,7 @@ async def approve_property(
     request: ApprovePropertyRequest,
     db: AsyncSession = Depends(get_db),
 ):
-    return await db.run_sync(lambda s: SuperAdminPropertyService(s).approve_property(property_id, request))
+    return await SuperAdminPropertyService(db).approve_property(property_id, request)
 
 
 @superAdmin.patch(
@@ -53,7 +53,7 @@ async def reject_property(
     request: RejectPropertyRequest,
     db: AsyncSession = Depends(get_db),
 ):
-    return await db.run_sync(lambda s: SuperAdminPropertyService(s).reject_property(property_id, request))
+    return await SuperAdminPropertyService(db).reject_property(property_id, request)
 
 
 @superAdmin.patch(
@@ -65,7 +65,7 @@ async def suspend_property(
     request: SuspendPropertyRequest,
     db: AsyncSession = Depends(get_db),
 ):
-    return await db.run_sync(lambda s: SuperAdminPropertyService(s).suspend_property(property_id, request))
+    return await SuperAdminPropertyService(db).suspend_property(property_id, request)
 
 
 @superAdmin.patch(
@@ -77,7 +77,7 @@ async def activate_property(
     request: ActivatePropertyRequest,
     db: AsyncSession = Depends(get_db),
 ):
-    return await db.run_sync(lambda s: SuperAdminPropertyService(s).activate_property(property_id, request))
+    return await SuperAdminPropertyService(db).activate_property(property_id, request)
 
 
 # @superAdmin.delete(
@@ -102,4 +102,4 @@ async def activate_property(
 async def property_approved(
     db: AsyncSession = Depends(get_db),
 ):
-    return await db.run_sync(lambda s: SuperAdminPropertyService(s).get_all_approved_property())
+    return await SuperAdminPropertyService(db).get_all_approved_property()

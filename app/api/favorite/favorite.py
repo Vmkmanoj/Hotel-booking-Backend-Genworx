@@ -21,11 +21,11 @@ async def add_to_favorite(
     db: AsyncSession = Depends(get_db),
     getUsers = Depends(get_current_user) 
 ):
-    return await db.run_sync(lambda s: FavoriteService.add_favorite(
-        db = s,
+    return await FavoriteService.add_favorite(
+        db=db,
         user_id = getUsers,
         property_id = property_id
-    ))
+    )
 
 @favoriteRouter.delete("/{property_id}")
 async def remove_from_favorite(
@@ -33,8 +33,8 @@ async def remove_from_favorite(
     db: AsyncSession = Depends(get_db),
     current_user = Depends(get_current_user),
 ):
-    return await db.run_sync(lambda s: FavoriteService.remove_favorite(
-        db=s,
+    return await FavoriteService.remove_favorite(
+        db=db,
         user_id=current_user,
         property_id=property_id,
-    ))
+    )

@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.property import Property
 from app.repositories.property_repository import PropertyRepository
@@ -12,8 +12,8 @@ from app.models.address import Address
 class PropertyService:
 
     @staticmethod
-    def create_property(
-        db: Session,
+    async def create_property(
+        db: AsyncSession,
         property_data: PropertyCreate
     ):
 
@@ -51,7 +51,7 @@ class PropertyService:
                 updated_by=str(property_data.owner_id),
             )
 
-            property = PropertyRepository.create(
+            property = await PropertyRepository.create(
                 db=db,
                 address=address,
                 property_obj=property_obj
@@ -69,13 +69,13 @@ class PropertyService:
             )
 
     @staticmethod
-    def get_my_properties(
-        db: Session,
+    async def get_my_properties(
+        db: AsyncSession,
         owner_id: UUID
     ):
         try:
 
-            properties = PropertyRepository.get_by_owner_id(
+            properties = await PropertyRepository.get_by_owner_id(
                 db=db,
                 owner_id=owner_id
             )
@@ -92,13 +92,13 @@ class PropertyService:
             )
 
     @staticmethod
-    def get_property_details(
-        db: Session,
+    async def get_property_details(
+        db: AsyncSession,
         property_id: UUID
     ):
         try:
 
-            property_obj = PropertyRepository.get_by_id(
+            property_obj = await PropertyRepository.get_by_id(
                 db=db,
                 property_id=property_id
             )
@@ -124,15 +124,15 @@ class PropertyService:
             )
 
     @staticmethod
-    def update_property(
-        db: Session,
+    async def update_property(
+        db: AsyncSession,
         property_id: UUID,
         owner_id: UUID,
         property_data: PropertyUpdate
     ):
         try:
 
-            property_obj = PropertyRepository.get_by_id(
+            property_obj = await PropertyRepository.get_by_id(
                 db=db,
                 property_id=property_id
             )
@@ -149,7 +149,7 @@ class PropertyService:
                     detail="You are not authorized to update this property."
                 )
 
-            updated_property = PropertyRepository.update(
+            updated_property = await PropertyRepository.update(
                 db=db,
                 property_obj=property_obj,
                 property_data=property_data
@@ -170,14 +170,14 @@ class PropertyService:
             )
         
     @staticmethod
-    def archive_property(
-        db: Session,
+    async def archive_property(
+        db: AsyncSession,
         property_id: UUID,
         owner_id: UUID
     ):
         try:
 
-            property_obj = PropertyRepository.get_by_id(
+            property_obj = await PropertyRepository.get_by_id(
                 db=db,
                 property_id=property_id
             )
@@ -194,7 +194,7 @@ class PropertyService:
                     detail="You are not authorized to archive this property."
                 )
 
-            archived_property = PropertyRepository.archive(
+            archived_property = await PropertyRepository.archive(
                 db=db,
                 property_obj=property_obj
             )
@@ -214,14 +214,14 @@ class PropertyService:
             )
 
     @staticmethod
-    def submit_property_for_review(
-        db: Session,
+    async def submit_property_for_review(
+        db: AsyncSession,
         property_id: UUID,
         owner_id: UUID
     ):
         try:
 
-            property_obj = PropertyRepository.get_by_id(
+            property_obj = await PropertyRepository.get_by_id(
                 db=db,
                 property_id=property_id
             )
@@ -245,7 +245,7 @@ class PropertyService:
                     detail="Archived properties cannot be submitted for review."
                 )
 
-            submitted_property = PropertyRepository.submit_for_review(
+            submitted_property = await PropertyRepository.submit_for_review(
                 db=db,
                 property_obj=property_obj
             )
@@ -265,14 +265,14 @@ class PropertyService:
             )
 
     @staticmethod
-    def delete_draft_property(
-        db: Session,
+    async def delete_draft_property(
+        db: AsyncSession,
         property_id: UUID,
         owner_id: UUID
     ):
         try:
 
-            property_obj = PropertyRepository.get_by_id(
+            property_obj = await PropertyRepository.get_by_id(
                 db=db,
                 property_id=property_id
             )
@@ -295,7 +295,7 @@ class PropertyService:
                     detail="Only draft properties can be deleted."
                 )
 
-            PropertyRepository.delete(
+            await PropertyRepository.delete(
                 db=db,
                 property_obj=property_obj
             )

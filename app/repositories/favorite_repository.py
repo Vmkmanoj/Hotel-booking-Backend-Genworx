@@ -1,4 +1,5 @@
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.favorites import Favorite
 
@@ -6,35 +7,32 @@ from app.models.favorites import Favorite
 class FavoriteRepository:
 
     @staticmethod
-    def get_by_user_and_property(
-        db: Session,
+    async def get_by_user_and_property(
+        db: AsyncSession,
         user_id,
         property_id
     ):
-        return (
-            db.query(Favorite)
-            .filter(
-                Favorite.user_id == user_id,
-                Favorite.property_id == property_id
-            )
-            .first()
-        )
+        result = await db.execute(select(Favorite).where(
+            Favorite.user_id == user_id,
+            Favorite.property_id == property_id,
+        ))
+        return result.scalar_one_or_none()
 
     @staticmethod
-    def create(
-        db: Session,
+    async def create(
+        db: AsyncSession,
         favorite: Favorite
     ):
         db.add(favorite)
-        db.commit()
-        db.refresh(favorite)
+        await db.commit()
+        await db.refresh(favorite)
 
         return favorite
     
     @staticmethod
-    def delete(
-        db: Session,
+    async def delete(
+        db: AsyncSession,
         favorite: Favorite
     ):
-        db.delete(favorite)
-        db.commit()
+        await db.delete(favorite)
+        await db.commit()
