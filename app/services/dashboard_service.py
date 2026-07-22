@@ -14,7 +14,7 @@ class DashboardService:
             total_customers=await self.repo.total_customers(),
             total_property_owners=await self.repo.total_property_owners(),
             total_admins=await self.repo.total_admins(),
-
+            suspend_properties= await self.repo.suspend_properties(),
             total_properties=await self.repo.total_properties(),
             pending_properties=await self.repo.pending_properties(),
             approved_properties=await self.repo.approved_properties(),

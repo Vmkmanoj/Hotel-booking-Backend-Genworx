@@ -67,6 +67,25 @@ async def suspend_property(
 ):
     return await SuperAdminPropertyService(db).suspend_property(property_id, request)
 
+@superAdmin.get(
+    "/property/status/suspend",
+)
+async def get_suspend_property(
+    db: AsyncSession = Depends(get_db),
+):
+    return await SuperAdminPropertyService(db).get_suspend_property()
+
+
+@superAdmin.get(
+    "/property/status/reject",
+)
+async def get_reject_property(
+    db: AsyncSession = Depends(get_db),
+):
+    return await SuperAdminPropertyService(db).get_reject_property()
+
+
+
 
 @superAdmin.patch(
     "/property/{property_id}/activate",
