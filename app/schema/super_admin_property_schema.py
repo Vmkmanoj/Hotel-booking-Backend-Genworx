@@ -3,12 +3,12 @@ from typing import Optional
 
 
 class RejectPropertyRequest(BaseModel):
-    remarks: str
+    reason: str
 
 
 class SuspendPropertyRequest(BaseModel):
-    remarks: str
+    reason: str
 
 
 class ActivatePropertyRequest(BaseModel):
-    remarks: Optional[str] = None
+    reason: Optional[str] = None

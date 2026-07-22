@@ -125,13 +125,39 @@ class SuperAdminPropertyService:
 
         await self.repo.suspend_property(
             property,
-            request.remarks
+            request.reason
         )
 
         return MessageResponse(
             success=True,
             message="Property suspended successfully."
         )
+
+    async def get_suspend_property(
+        self,
+    ):
+        result = await self.db.execute(
+            select(Property)
+            .where(
+                Property.is_deleted.is_(False),
+                Property.status == PropertyStatus.SUSPENDED.value,
+            )
+            .order_by(Property.updated_at.desc())
+        )
+        return result.scalars().all()
+
+    async def get_reject_property(self):
+
+        result = await self.db.execute(
+                    select(Property)
+                    .where(
+                        Property.is_deleted.is_(False),
+                        Property.status == PropertyStatus.REJECTED.value,
+                    )
+                    .order_by(Property.updated_at.desc())
+                )
+        return result.scalars().all()
+        
 
 
     async def activate_property(

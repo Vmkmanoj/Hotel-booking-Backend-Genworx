@@ -34,6 +34,10 @@ class DashboardRepository:
     async def rejected_properties(self):
         return await self._count(select(Property).where(Property.status == PropertyStatus.REJECTED.value))
 
+    async def suspend_properties(self):
+        return await self._count(select(Property).where(Property.status == PropertyStatus.SUSPENDED.value))
+
+
     async def _count(self, statement):
         result = await self.db.execute(
             select(func.count()).select_from(statement.subquery())
