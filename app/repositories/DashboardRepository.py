@@ -2,7 +2,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.users import User
 from app.models.roles import Role
-from app.models.property import Property
+from app.models.property import Property, PropertyStatus
 
 
 class DashboardRepository:
@@ -26,13 +26,13 @@ class DashboardRepository:
         return await self._count(select(Property))
 
     async def pending_properties(self):
-        return await self._count(select(Property).where(Property.status == "PENDING"))
+        return await self._count(select(Property).where(Property.status == PropertyStatus.PENDING.value))
 
     async def approved_properties(self):
-        return await self._count(select(Property).where(Property.status == "APPROVED"))
+        return await self._count(select(Property).where(Property.status == PropertyStatus.APPROVED.value))
 
     async def rejected_properties(self):
-        return await self._count(select(Property).where(Property.status == "REJECTED"))
+        return await self._count(select(Property).where(Property.status == PropertyStatus.REJECTED.value))
 
     async def _count(self, statement):
         result = await self.db.execute(

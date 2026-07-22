@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.favorites import Favorite
-from app.models.property import Property
+from app.models.property import Property, PropertyStatus
 
 from app.repositories.favorite_repository import FavoriteRepository
 
@@ -21,7 +21,7 @@ class FavoriteService:
         property = (await db.execute(select(Property).where(
             Property.id == property_id,
             Property.is_deleted.is_(False),
-            Property.status == "APPROVED",
+            Property.status == PropertyStatus.APPROVED.value,
         ))).scalar_one_or_none()
 
         if not property:

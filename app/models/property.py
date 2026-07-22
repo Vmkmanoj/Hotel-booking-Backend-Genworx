@@ -11,7 +11,6 @@ from sqlalchemy import (
     ForeignKey,
     DECIMAL,
     Integer,
-    Enum,
 )
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
@@ -76,10 +75,13 @@ class Property(Base):
 
     smoking_policy = Column(Text)
 
+    # The existing database migration defines this column as VARCHAR(100).
+    # Keep the model aligned with that schema; PropertyStatus is still used for
+    # validation at the application/schema layer.
     status = Column(
-        Enum(PropertyStatus),
+        String(100),
         nullable=False,
-        default=PropertyStatus.PENDING
+        default=PropertyStatus.PENDING.value,
     )
 
     is_verified = Column(

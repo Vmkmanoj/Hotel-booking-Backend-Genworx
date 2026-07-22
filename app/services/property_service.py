@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.property import Property
+from app.models.property import Property, PropertyStatus
 from app.repositories.property_repository import PropertyRepository
 from app.schema.property_schema import PropertyCreate, PropertyUpdate
 from app.models.address import Address
@@ -45,7 +45,7 @@ class PropertyService:
                 smoking_policy=property_data.smoking_policy,
                 check_in_time=property_data.check_in_time,
                 check_out_time=property_data.check_out_time,
-                status="PENDING",
+                status=PropertyStatus.PENDING.value,
                 is_verified=False,
                 created_by=str(property_data.owner_id),
                 updated_by=str(property_data.owner_id),

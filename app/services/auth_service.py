@@ -8,7 +8,6 @@ from app.models.permissions import Permission
 from app.models.roles_permission import RolePermission
 from app.schema.login import  LoginResponse
 from app.models.users import User
-from app.models.roles import Role
 from app.utils.passwordhashing import hash_password
 from app.schema.auth import  RegisterResponse
 

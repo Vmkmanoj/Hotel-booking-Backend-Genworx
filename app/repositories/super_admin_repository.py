@@ -1,6 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models.property import Property
+from app.models.property import Property, PropertyStatus
 from app.models.users import User
 from app.models.address import Address
 from datetime import datetime
@@ -26,7 +26,7 @@ class SuperAdminPropertyRepository:
             )
             .join(User, Property.owner_id == User.id)
             .join(Address, Property.address_id == Address.id)
-            .where(Property.status == "PENDING")
+            .where(Property.status == PropertyStatus.PENDING.value)
             .order_by(Property.created_at.desc())
         )
         return result.all()
@@ -63,7 +63,7 @@ class SuperAdminPropertyRepository:
 
     async def approve_property(self, property):
 
-        property.status = "APPROVED"
+        property.status = PropertyStatus.APPROVED.value
         property.is_verified = True
 
         await self.db.commit()
@@ -72,7 +72,9 @@ class SuperAdminPropertyRepository:
         return property
     
     async def get_approve_property(self):
-        result = await self.db.execute(select(Property).where(Property.status == "APPROVED"))
+        result = await self.db.execute(
+            select(Property).where(Property.status == PropertyStatus.APPROVED.value)
+        )
         return result.scalars().all()
     
 
@@ -83,7 +85,7 @@ class SuperAdminPropertyRepository:
         admin_id=None
     ):
 
-        property.status = "REJECTED"
+        property.status = PropertyStatus.REJECTED.value
         property.is_verified = False
         property.approval_remarks = remarks
         property.approved_by = admin_id
@@ -102,7 +104,7 @@ class SuperAdminPropertyRepository:
         admin_id=None
     ):
 
-        property.status = "SUSPENDED"
+        property.status = PropertyStatus.SUSPENDED.value
         property.approval_remarks = remarks
         property.approved_by = admin_id
 
@@ -119,7 +121,7 @@ class SuperAdminPropertyRepository:
         admin_id=None
     ):
 
-        property.status = "APPROVED"
+        property.status = PropertyStatus.APPROVED.value
         property.is_verified = True
         property.approval_remarks = remarks
         property.approved_by = admin_id

@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.property import Property
+from app.models.property import Property, PropertyStatus
 from app.repositories.super_admin_repository import (
     SuperAdminPropertyRepository,
 )
@@ -60,7 +60,7 @@ class SuperAdminPropertyService:
                 detail="Property not found"
             )
 
-        if property.status == "APPROVED":
+        if property.status == PropertyStatus.APPROVED.value:
             raise HTTPException(
                 status_code=400,
                 detail="Property already approved"
