@@ -1,9 +1,10 @@
 from fastapi import APIRouter , Depends 
 from app.database import get_db
-from sqlalchemy.orm import Session
 from app.schema.auth import CustomerRegister , PropertyRegister , RegisterResponse
 from app.schema.login import LoginRequest ,LoginResponse
 from app.services.auth_service import AuthService
+from sqlalchemy.ext.asyncio import AsyncSession
+
 
 
 
@@ -12,40 +13,33 @@ authRouter = APIRouter()
 
 
 @authRouter.post("/login", response_model=LoginResponse)
-def login(login: LoginRequest, db: Session = Depends(get_db)):
-    
-    authService = AuthService(db)
-
-    return authService.login(login)
+async def login(login: LoginRequest, db: AsyncSession = Depends(get_db)):
+    return await db.run_sync(lambda s: AuthService(s).login(login))
 
 
 @authRouter.post(
     "/property/register",
     response_model=RegisterResponse
 )
-def property_register(
+async def property_register(
     owner: PropertyRegister,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
-    authService = AuthService(db)
-    
-    return authService.propertyOwnerRegister(owner)
+    return await db.run_sync(lambda s: AuthService(s).propertyOwnerRegister(owner))
 
 @authRouter.post(
     "/customer/register",
     response_model=RegisterResponse
 )
-def customer_register(
+async def customer_register(
     user: CustomerRegister,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
-    authService = AuthService(db)
-    
-    return authService.customer_regsiter(user)
+    return await db.run_sync(lambda s: AuthService(s).customer_regsiter(user))
 
 
 @authRouter.get("/")
-def getAuth():
+async def getAuth():
     return "testing...."
 
 

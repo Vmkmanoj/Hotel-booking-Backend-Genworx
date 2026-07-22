@@ -16,15 +16,17 @@ class FavoriteService:
         user_id,
         property_id
     ):
+        print("userId",user_id)
+        print("propertyId",property_id)
 
         property = (
-            db.query(Property)
-            .filter(
-                Property.id == property_id,
-                not Property.is_deleted,
-                Property.status == "APPROVED"
-            )
-            .first()
+        db.query(Property)
+        .filter(
+            Property.id == property_id,
+            Property.is_deleted == False,
+            Property.status == "APPROVED"
+        )
+        .first()
         )
 
         if not property:
@@ -61,3 +63,32 @@ class FavoriteService:
             success=True,
             message="Property added to favorites."
         )
+    
+
+    @staticmethod
+    def remove_favorite(
+        db,
+        user_id,
+        property_id,
+    ):
+        favorite = FavoriteRepository.get_by_user_and_property(
+            db=db,
+            user_id=user_id,
+            property_id=property_id,
+        )
+
+        if not favorite:
+            raise HTTPException(
+                status_code=400,
+                detail="Favorite not found."
+            )
+
+        FavoriteRepository.delete(
+            db=db,
+            favorite=favorite
+        )
+
+        return {
+            "success": True,
+            "message": "Property removed from favorites."
+        }

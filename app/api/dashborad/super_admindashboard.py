@@ -1,5 +1,5 @@
 from fastapi import  Depends , APIRouter
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.services.dashboard_service import DashboardService
@@ -12,8 +12,7 @@ dashboardRouter = APIRouter()
     "/dashboard",
     response_model=DashboardResponse
 )
-def dashboard(
-    db: Session = Depends(get_db)
+async def dashboard(
+    db: AsyncSession = Depends(get_db)
 ):
-    service = DashboardService(db)
-    return service.get_dashboard()
+    return await db.run_sync(lambda s: DashboardService(s).get_dashboard())

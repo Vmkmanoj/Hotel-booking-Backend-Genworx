@@ -30,3 +30,11 @@ class FavoriteRepository:
         db.refresh(favorite)
 
         return favorite
+    
+    @staticmethod
+    def delete(
+        db: Session,
+        favorite: Favorite
+    ):
+        db.delete(favorite)
+        db.commit()

@@ -20,6 +20,19 @@ class SuperAdminPropertyService:
     def get_pending_properties(self):
 
         return self.repo.get_pending_properties()
+    
+    def get_all_approved_property(self):
+
+        property = self.repo.get_approve_property()
+         
+        if not property:
+            raise HTTPException(
+                status_code=404,
+                detail="Property not found"
+            )
+        
+        return property
+         
 
     def get_property(self, property_id):
 

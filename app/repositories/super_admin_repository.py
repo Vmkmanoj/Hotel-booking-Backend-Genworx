@@ -70,6 +70,13 @@ class SuperAdminPropertyRepository:
 
         return property
     
+    def get_approve_property(self):
+        return (
+            self.db.query(Property)
+            .filter(Property.status == "APPROVED")
+            .all()
+        )
+    
 
     def reject_property(
         self,
