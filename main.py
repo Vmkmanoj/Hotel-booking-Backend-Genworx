@@ -1,11 +1,22 @@
 from app.routers import router
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
 from fastapi.middleware.cors import CORSMiddleware
+from app.database.engine import SessionLocal
+from app.seed.seed_data import seed_database
 
 
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with SessionLocal() as db:
+        await seed_database(db)
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
