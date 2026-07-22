@@ -39,7 +39,7 @@ def upgrade() -> None:
         "verified_at",
         sa.DateTime(timezone=True),
         nullable=True,
-    )
+    ),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_by', sa.UUID(), nullable=True),
     sa.Column('updated_by', sa.UUID(), nullable=True),
@@ -47,7 +47,7 @@ def upgrade() -> None:
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['owner_id'], ['users.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['verified_by'], ['users.id'], ondelete='SET NULL'),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
     )
     op.create_index(op.f('ix_properties_owner_id'), 'properties', ['owner_id'], unique=False)
     op.create_index(op.f('ix_properties_property_status'), 'properties', ['property_status'], unique=False)
