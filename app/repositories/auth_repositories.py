@@ -1,26 +1,23 @@
 
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.users import User
 from app.models.roles import Role
 
 class AuthRepository:
-    def __init__(self, db : Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
 
-    def get_user_by_email(self, email):
-
-        return (
-            self.db.query(User)
-            .filter(User.email == email)
-            .first()
-        )
+    async def get_user_by_email(self, email: str):
+        result = await self.db.execute(select(User).where(User.email == email))
+        return result.scalar_one_or_none()
     
-    def get_user_role(self,role_id):
-
-        return (
-            self.db.query(Role).filter(Role.id == role_id).first())
+    async def get_user_role(self, role_id):
+        result = await self.db.execute(select(Role).where(Role.id == role_id))
+        return result.scalar_one_or_none()
     
 
-    def get_role_by_name(self, role_name):
-        return self.db.query(Role).filter(Role.name == role_name).first()
+    async def get_role_by_name(self, role_name: str):
+        result = await self.db.execute(select(Role).where(Role.name == role_name))
+        return result.scalar_one_or_none()
 

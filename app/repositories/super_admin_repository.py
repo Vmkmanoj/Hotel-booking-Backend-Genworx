@@ -1,18 +1,20 @@
-from sqlalchemy.orm import Session
-from app.models.property import Property
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.models.property import Property, PropertyStatus
 from app.models.users import User
 from app.models.address import Address
+from datetime import datetime
 
 
 class SuperAdminPropertyRepository:
 
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
 
-    def get_pending_properties(self):
+    async def get_pending_properties(self):
 
-        return (
-            self.db.query(
+        result = await self.db.execute(
+            select(
                 Property.id,
                 Property.property_name,
                 User.first_name.label("owner_name"),
@@ -24,15 +26,15 @@ class SuperAdminPropertyRepository:
             )
             .join(User, Property.owner_id == User.id)
             .join(Address, Property.address_id == Address.id)
-            .filter(Property.status == "PENDING")
+            .where(Property.status == PropertyStatus.PENDING.value)
             .order_by(Property.created_at.desc())
-            .all()
         )
+        return result.all()
 
-    def get_property_by_id(self, property_id):
+    async def get_property_by_id(self, property_id):
 
-        return (
-            self.db.query(
+        result = await self.db.execute(
+            select(
                 Property.id,
                 Property.property_name,
                 Property.description,
@@ -55,16 +57,138 @@ class SuperAdminPropertyRepository:
             )
             .join(User, Property.owner_id == User.id)
             .join(Address, Property.address_id == Address.id)
-            .filter(Property.id == property_id)
-            .first()
+            .where(Property.id == property_id)
         )
+        return result.first()
 
-    def approve_property(self, property):
+    async def approve_property(self, property):
 
-        property.status = "APPROVED"
+        property.status = PropertyStatus.APPROVED.value
         property.is_verified = True
+
+        await self.db.commit()
+        await self.db.refresh(property)
+
+        return property
+    
+<<<<<<< Updated upstream
+    async def get_approve_property(self):
+        result = await self.db.execute(
+            select(Property).where(Property.status == PropertyStatus.APPROVED.value)
+        )
+        return result.scalars().all()
+    
+
+    async def reject_property(
+=======
+    def get_approve_property(self):
+        return (
+            self.db.query(Property)
+            .filter(Property.status == "APPROVED")
+            .all()
+        )
+    
+
+    def reject_property(
+>>>>>>> Stashed changes
+        self,
+        property,
+        remarks,
+        admin_id=None
+    ):
+
+<<<<<<< Updated upstream
+        property.status = PropertyStatus.REJECTED.value
+=======
+        property.status = "REJECTED"
+>>>>>>> Stashed changes
+        property.is_verified = False
+        property.approval_remarks = remarks
+        property.approved_by = admin_id
+        property.approved_at = datetime.utcnow()
+
+<<<<<<< Updated upstream
+        await self.db.commit()
+        await self.db.refresh(property)
+=======
+        self.db.commit()
+        self.db.refresh(property)
+>>>>>>> Stashed changes
+
+        return property
+
+
+<<<<<<< Updated upstream
+    async def suspend_property(
+=======
+    def suspend_property(
+>>>>>>> Stashed changes
+        self,
+        property,
+        remarks,
+        admin_id=None
+    ):
+
+<<<<<<< Updated upstream
+        property.status = PropertyStatus.SUSPENDED.value
+        property.approval_remarks = remarks
+        property.approved_by = admin_id
+
+        await self.db.commit()
+        await self.db.refresh(property)
+=======
+        property.status = "SUSPENDED"
+        property.approval_remarks = remarks
+        property.approved_by = admin_id
 
         self.db.commit()
         self.db.refresh(property)
+>>>>>>> Stashed changes
 
         return property
+
+
+<<<<<<< Updated upstream
+    async def activate_property(
+=======
+    def activate_property(
+>>>>>>> Stashed changes
+        self,
+        property,
+        remarks,
+        admin_id=None
+    ):
+
+<<<<<<< Updated upstream
+        property.status = PropertyStatus.APPROVED.value
+=======
+        property.status = "APPROVED"
+>>>>>>> Stashed changes
+        property.is_verified = True
+        property.approval_remarks = remarks
+        property.approved_by = admin_id
+
+<<<<<<< Updated upstream
+        await self.db.commit()
+        await self.db.refresh(property)
+=======
+        self.db.commit()
+        self.db.refresh(property)
+>>>>>>> Stashed changes
+
+        return property
+
+
+<<<<<<< Updated upstream
+    async def delete_property(self, property):
+
+        property.is_deleted = True
+
+        await self.db.commit()
+=======
+    def delete_property(self, property):
+
+        property.is_deleted = True
+
+        self.db.commit()
+>>>>>>> Stashed changes

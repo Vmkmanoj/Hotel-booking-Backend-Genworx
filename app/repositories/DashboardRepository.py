@@ -1,61 +1,41 @@
-from sqlalchemy.orm import Session
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.users import User
 from app.models.roles import Role
-from app.models.property import Property
+from app.models.property import Property, PropertyStatus
 
 
 class DashboardRepository:
 
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
 
-    def total_users(self):
-        return self.db.query(User).count()
+    async def total_users(self):
+        return await self._count(select(User))
 
-    def total_customers(self):
-        return (
-            self.db.query(User)
-            .join(Role)
-            .filter(Role.name == "CUSTOMER")
-            .count()
+    async def total_customers(self):
+        return await self._count(select(User).join(Role).where(Role.name == "CUSTOMER"))
+
+    async def total_property_owners(self):
+        return await self._count(select(User).join(Role).where(Role.name == "PROPERTY_OWNER"))
+
+    async def total_admins(self):
+        return await self._count(select(User).join(Role).where(Role.name == "SUPER_ADMIN"))
+
+    async def total_properties(self):
+        return await self._count(select(Property))
+
+    async def pending_properties(self):
+        return await self._count(select(Property).where(Property.status == PropertyStatus.PENDING.value))
+
+    async def approved_properties(self):
+        return await self._count(select(Property).where(Property.status == PropertyStatus.APPROVED.value))
+
+    async def rejected_properties(self):
+        return await self._count(select(Property).where(Property.status == PropertyStatus.REJECTED.value))
+
+    async def _count(self, statement):
+        result = await self.db.execute(
+            select(func.count()).select_from(statement.subquery())
         )
-
-    def total_property_owners(self):
-        return (
-            self.db.query(User)
-            .join(Role)
-            .filter(Role.name == "PROPERTY_OWNER")
-            .count()
-        )
-
-    def total_admins(self):
-        return (
-            self.db.query(User)
-            .join(Role)
-            .filter(Role.name == "SUPER_ADMIN")
-            .count()
-        )
-
-    def total_properties(self):
-        return self.db.query(Property).count()
-
-    def pending_properties(self):
-        return (
-            self.db.query(Property)
-            .filter(Property.status == "PENDING")
-            .count()
-        )
-
-    def approved_properties(self):
-        return (
-            self.db.query(Property)
-            .filter(Property.status == "APPROVED")
-            .count()
-        )
-
-    def rejected_properties(self):
-        return (
-            self.db.query(Property)
-            .filter(Property.status == "REJECTED")
-            .count()
-        )
+        return result.scalar_one()

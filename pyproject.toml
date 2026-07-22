@@ -15,4 +15,5 @@ dependencies = [
     "pydantic>=2.13.4",
     "python-jose[cryptography]>=3.5.0",
     "uvicorn>=0.50.2",
+    "asyncpg>=0.31.0",
 ]
