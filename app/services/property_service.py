@@ -3,12 +3,7 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-<<<<<<< Updated upstream
 from app.models.property import Property, PropertyStatus
-=======
-from app.models.property import Property
-from app.models.address import Address
->>>>>>> Stashed changes
 from app.repositories.property_repository import PropertyRepository
 from app.schema.property_schema import PropertyCreate, PropertyUpdate
 from app.models.address import Address
@@ -50,21 +45,13 @@ class PropertyService:
                 smoking_policy=property_data.smoking_policy,
                 check_in_time=property_data.check_in_time,
                 check_out_time=property_data.check_out_time,
-<<<<<<< Updated upstream
                 status=PropertyStatus.PENDING.value,
-=======
-                status="PENDING",
->>>>>>> Stashed changes
                 is_verified=False,
                 created_by=str(property_data.owner_id),
                 updated_by=str(property_data.owner_id),
             )
 
-<<<<<<< Updated upstream
-            property = await PropertyRepository.create(
-=======
             property_created = await PropertyRepository.create(
->>>>>>> Stashed changes
                 db=db,
                 address=address,
                 property_obj=property_obj
@@ -274,7 +261,6 @@ class PropertyService:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to submit property for review."
-<<<<<<< Updated upstream
             )
 
     @staticmethod
@@ -325,6 +311,3 @@ class PropertyService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to delete property."
             )
-=======
-            )
->>>>>>> Stashed changes

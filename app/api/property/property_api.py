@@ -85,14 +85,14 @@ async def submit_property_for_review(
     )
 
 
-@propertyRouter.delete("/{property_id}")
-async def delete_draft_property(
-    property_id: UUID,
-    owner_id: UUID,
-    db: AsyncSession = Depends(get_db)
-):
-    return await PropertyService.delete_draft_property(
-        db=db,
-        property_id=property_id,
-        owner_id=owner_id
-    )
+# @propertyRouter.delete("/{property_id}")
+# async def delete_draft_property(
+#     property_id: UUID,
+#     owner_id: UUID,
+#     db: AsyncSession = Depends(get_db)
+# ):
+#     return await PropertyService.delete_draft_property(
+#         db=db,
+#         property_id=property_id,
+#         owner_id=owner_id
+#     )

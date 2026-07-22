@@ -21,26 +21,9 @@ class SuperAdminPropertyService:
 
     async def get_pending_properties(self):
 
-<<<<<<< Updated upstream
         return await self.repo.get_pending_properties()
     
     async def get_all_approved_property(self):
-=======
-        return self.repo.get_pending_properties()
-    
-    def get_all_approved_property(self):
-
-        property = self.repo.get_approve_property()
-         
-        if not property:
-            raise HTTPException(
-                status_code=404,
-                detail="Property not found"
-            )
-        
-        return property
-         
->>>>>>> Stashed changes
 
         property = await self.repo.get_approve_property()
          
@@ -91,33 +74,18 @@ class SuperAdminPropertyService:
         )
     
 
-<<<<<<< Updated upstream
     async def reject_property(
-=======
-    def reject_property(
->>>>>>> Stashed changes
         self,
         property_id,
         request
                 ):
 
-<<<<<<< Updated upstream
         property = (await self.db.execute(
             select(Property).where(
                 Property.id == property_id,
                 Property.is_deleted.is_(False),
             )
         )).scalar_one_or_none()
-=======
-        property = (
-            self.db.query(Property)
-            .filter(
-                Property.id == property_id,
-                not Property.is_deleted
-            )
-            .first()
-        )
->>>>>>> Stashed changes
 
         if not property:
             raise HTTPException(
@@ -125,11 +93,7 @@ class SuperAdminPropertyService:
                 detail="Property not found"
             )
 
-<<<<<<< Updated upstream
         await self.repo.reject_property(
-=======
-        self.repo.reject_property(
->>>>>>> Stashed changes
             property,
             request.remarks
         )
@@ -140,33 +104,18 @@ class SuperAdminPropertyService:
         )
 
 
-<<<<<<< Updated upstream
     async def suspend_property(
-=======
-    def suspend_property(
->>>>>>> Stashed changes
         self,
         property_id,
         request
     ):
 
-<<<<<<< Updated upstream
         property = (await self.db.execute(
             select(Property).where(
                 Property.id == property_id,
                 Property.is_deleted.is_(False),
             )
         )).scalar_one_or_none()
-=======
-        property = (
-            self.db.query(Property)
-            .filter(
-                Property.id == property_id,
-                not Property.is_deleted
-            )
-            .first()
-        )
->>>>>>> Stashed changes
 
         if not property:
             raise HTTPException(
@@ -174,11 +123,7 @@ class SuperAdminPropertyService:
                 detail="Property not found"
             )
 
-<<<<<<< Updated upstream
         await self.repo.suspend_property(
-=======
-        self.repo.suspend_property(
->>>>>>> Stashed changes
             property,
             request.remarks
         )
@@ -189,33 +134,18 @@ class SuperAdminPropertyService:
         )
 
 
-<<<<<<< Updated upstream
     async def activate_property(
-=======
-    def activate_property(
->>>>>>> Stashed changes
         self,
         property_id,
         request
     ):
 
-<<<<<<< Updated upstream
         property = (await self.db.execute(
             select(Property).where(
                 Property.id == property_id,
                 Property.is_deleted.is_(False),
             )
         )).scalar_one_or_none()
-=======
-        property = (
-            self.db.query(Property)
-            .filter(
-                Property.id == property_id,
-                not Property.is_deleted
-            )
-            .first()
-        )
->>>>>>> Stashed changes
 
         if not property:
             raise HTTPException(
@@ -223,11 +153,7 @@ class SuperAdminPropertyService:
                 detail="Property not found"
             )
 
-<<<<<<< Updated upstream
         await self.repo.activate_property(
-=======
-        self.repo.activate_property(
->>>>>>> Stashed changes
             property,
             request.remarks
         )
@@ -238,32 +164,17 @@ class SuperAdminPropertyService:
         )
 
 
-<<<<<<< Updated upstream
     async def delete_property(
-=======
-    def delete_property(
->>>>>>> Stashed changes
         self,
         property_id
     ):
 
-<<<<<<< Updated upstream
         property = (await self.db.execute(
             select(Property).where(
                 Property.id == property_id,
                 Property.is_deleted.is_(False),
             )
         )).scalar_one_or_none()
-=======
-        property = (
-            self.db.query(Property)
-            .filter(
-                Property.id == property_id,
-                not Property.is_deleted
-            )
-            .first()
-        )
->>>>>>> Stashed changes
 
         if not property:
             raise HTTPException(
@@ -271,17 +182,9 @@ class SuperAdminPropertyService:
                 detail="Property not found"
             )
 
-<<<<<<< Updated upstream
         await self.repo.delete_property(property)
-=======
-        self.repo.delete_property(property)
->>>>>>> Stashed changes
 
         return MessageResponse(
             success=True,
             message="Property deleted successfully."
-<<<<<<< Updated upstream
         )
-=======
-        )
->>>>>>> Stashed changes

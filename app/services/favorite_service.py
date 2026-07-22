@@ -1,15 +1,9 @@
 from fastapi import HTTPException
-<<<<<<< Updated upstream
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.favorites import Favorite
 from app.models.property import Property, PropertyStatus
-=======
-
-from app.models.favorites import Favorite
-from app.models.property import Property
->>>>>>> Stashed changes
 
 from app.repositories.favorite_repository import FavoriteRepository
 
@@ -19,7 +13,6 @@ from app.schema.favorite_schema import FavoriteResponse
 class FavoriteService:
 
     @staticmethod
-<<<<<<< Updated upstream
     async def add_favorite(
         db: AsyncSession,
         user_id,
@@ -30,25 +23,6 @@ class FavoriteService:
             Property.is_deleted.is_(False),
             Property.status == PropertyStatus.APPROVED.value,
         ))).scalar_one_or_none()
-=======
-    def add_favorite(
-        db,
-        user_id,
-        property_id
-    ):
-        print("userId",user_id)
-        print("propertyId",property_id)
-
-        property = (
-        db.query(Property)
-        .filter(
-            Property.id == property_id,
-            Property.is_deleted == False,
-            Property.status == "APPROVED"
-        )
-        .first()
-        )
->>>>>>> Stashed changes
 
         if not property:
             raise HTTPException(
@@ -56,11 +30,7 @@ class FavoriteService:
                 detail="Property not found."
             )
 
-<<<<<<< Updated upstream
         favorite = await FavoriteRepository.get_by_user_and_property(
-=======
-        favorite = FavoriteRepository.get_by_user_and_property(
->>>>>>> Stashed changes
             db,
             user_id,
             property_id
@@ -79,11 +49,7 @@ class FavoriteService:
             updated_by=str(user_id),
         )
 
-<<<<<<< Updated upstream
         await FavoriteRepository.create(
-=======
-        FavoriteRepository.create(
->>>>>>> Stashed changes
             db,
             favorite
         )
@@ -95,21 +61,12 @@ class FavoriteService:
     
 
     @staticmethod
-<<<<<<< Updated upstream
     async def remove_favorite(
         db: AsyncSession,
         user_id,
         property_id,
     ):
         favorite = await FavoriteRepository.get_by_user_and_property(
-=======
-    def remove_favorite(
-        db,
-        user_id,
-        property_id,
-    ):
-        favorite = FavoriteRepository.get_by_user_and_property(
->>>>>>> Stashed changes
             db=db,
             user_id=user_id,
             property_id=property_id,
@@ -121,11 +78,7 @@ class FavoriteService:
                 detail="Favorite not found."
             )
 
-<<<<<<< Updated upstream
         await FavoriteRepository.delete(
-=======
-        FavoriteRepository.delete(
->>>>>>> Stashed changes
             db=db,
             favorite=favorite
         )
@@ -133,8 +86,4 @@ class FavoriteService:
         return {
             "success": True,
             "message": "Property removed from favorites."
-<<<<<<< Updated upstream
         }
-=======
-        }
->>>>>>> Stashed changes
