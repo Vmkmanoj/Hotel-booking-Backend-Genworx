@@ -152,6 +152,12 @@ class Property(Base):
         uselist=False
     )
 
+    favorites = relationship(
+    "Favorite",
+    back_populates="property",
+    cascade="all, delete-orphan"
+    )
+
     # rooms = relationship(
     #     "Room",
     #     back_populates="property",

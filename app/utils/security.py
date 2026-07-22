@@ -12,7 +12,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
             detail="Invalid token"
         )
 
-    user_id = payload.get("user_id")
+    user_id = payload.get("sub")
 
     if user_id is None:
         raise HTTPException(

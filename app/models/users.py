@@ -58,3 +58,9 @@ class User(Base):
         foreign_keys="Property.approved_by",
         back_populates="approved_admin"
     )
+
+    favorites = relationship(
+        "Favorite",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
