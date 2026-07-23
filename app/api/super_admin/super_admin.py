@@ -4,8 +4,17 @@ from typing import List
 from uuid import UUID
 from app.database import get_db
 from app.services.super_admin_service import SuperAdminPropertyService
-from app.schema.super_admin_schema import PendingPropertyResponse, PropertyDetailResponse, MessageResponse, ApprovePropertyRequest
-from app.schema.super_admin_property_schema import ActivatePropertyRequest, RejectPropertyRequest, SuspendPropertyRequest
+from app.schema.super_admin_schema import (
+    PendingPropertyResponse,
+    PropertyDetailResponse,
+    MessageResponse,
+    ApprovePropertyRequest,
+)
+from app.schema.super_admin_property_schema import (
+    ActivatePropertyRequest,
+    RejectPropertyRequest,
+    SuspendPropertyRequest,
+)
 
 
 superAdmin = APIRouter()
@@ -67,6 +76,7 @@ async def suspend_property(
 ):
     return await SuperAdminPropertyService(db).suspend_property(property_id, request)
 
+
 @superAdmin.get(
     "/property/status/suspend",
 )
@@ -83,8 +93,6 @@ async def get_reject_property(
     db: AsyncSession = Depends(get_db),
 ):
     return await SuperAdminPropertyService(db).get_reject_property()
-
-
 
 
 @superAdmin.patch(
@@ -122,3 +130,13 @@ async def property_approved(
     db: AsyncSession = Depends(get_db),
 ):
     return await SuperAdminPropertyService(db).get_all_approved_property()
+
+
+@superAdmin.get("/property/all/onwers")
+async def getAllPropertyOnwers(db: AsyncSession = Depends(get_db)):
+    return await SuperAdminPropertyService(db).getAllPropertyOwners()
+
+
+@superAdmin.get("/property/all/customers")
+async def getAllCustomers(db: AsyncSession = Depends(get_db)):
+    return await SuperAdminPropertyService(db).getAllCustomers()

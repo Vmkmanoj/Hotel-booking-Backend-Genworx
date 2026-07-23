@@ -10,6 +10,7 @@ from app.schema.login import  LoginResponse
 from app.models.users import User
 from app.utils.passwordhashing import hash_password
 from app.schema.auth import  RegisterResponse
+from app.models.property import Property
 
 
 class AuthService:
@@ -49,12 +50,23 @@ class AuthService:
         }
         )
 
+        property_status = None
+        if role.name == "PROPERTY_OWNER":
+            result = await self.db.execute(
+                select(Property).where(Property.owner_id == user.id)
+            )
+            property = result.scalars().first()
+            if property:
+                property_status = property.status
+
         return LoginResponse(
             success=True,
             message="Login successful",
-            role = role.name ,
+            role = role.name,
             access_token=access_token,
-            token_type="Bearer"
+            token_type="Bearer",
+            userId = user.id,
+            status = property_status
         )
     
     async def propertyOwnerRegister(self, request):

@@ -16,6 +16,8 @@ async def create_property(
     property_data: PropertyCreate,
     db: AsyncSession = Depends(get_db)
 ):
+
+    print("property",property_data)
     return await PropertyService.create_property(
         db=db,
         property_data=property_data

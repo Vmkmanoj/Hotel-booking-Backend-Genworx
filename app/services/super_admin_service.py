@@ -2,7 +2,9 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.property import Property, PropertyStatus
+from app.models.property import Property, PropertyStatus 
+from app.models.users import User
+from app.models.roles import Role
 from app.repositories.super_admin_repository import (
     SuperAdminPropertyRepository,
 )
@@ -50,6 +52,7 @@ class SuperAdminPropertyService:
 
     async def approve_property(self, property_id, request):
 
+    
         property = (await self.db.execute(
             select(Property).where(Property.id == property_id)
         )).scalar_one_or_none()
@@ -66,7 +69,7 @@ class SuperAdminPropertyService:
                 detail="Property already approved"
             )
 
-        await self.repo.approve_property(property)
+        await self.repo.approve_property(property ,request.remarks )
 
         return MessageResponse(
             success=True,
@@ -132,6 +135,42 @@ class SuperAdminPropertyService:
             success=True,
             message="Property suspended successfully."
         )
+
+    async def getAllCustomers(self):
+        result = await self.db.execute(
+            select(User)
+            .join(Role, User.role_id == Role.id)
+            .where(Role.name == "CUSTOMER")
+        )
+
+        customers = result.scalars().all()
+
+        if not customers:
+            raise HTTPException(
+                status_code=404,
+                detail="Customers not found"
+            )
+
+        return customers
+
+    async def getAllPropertyOwners(self):
+        result = await self.db.execute(
+            select(User)
+            .join(Role, User.role_id == Role.id)
+            .where(Role.name == "PROPERTY_OWNER")
+        )
+
+        property_owners = result.scalars().all()
+
+        if not property_owners:
+            raise HTTPException(
+                status_code=404,
+                detail="Property owners not found"
+            )
+
+        return property_owners
+
+
 
     async def get_suspend_property(
         self,

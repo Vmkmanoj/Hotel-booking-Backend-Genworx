@@ -61,7 +61,8 @@ class SuperAdminPropertyRepository:
         )
         return result.first()
 
-    async def approve_property(self, property):
+    async def approve_property(self, property, remarks,
+        admin_id=None):
 
         property.status = PropertyStatus.APPROVED.value
         property.is_verified = True

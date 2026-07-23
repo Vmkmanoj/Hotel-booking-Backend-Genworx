@@ -9,7 +9,7 @@ class DashboardService:
 
     async def get_dashboard(self):
 
-        return DashboardResponse(
+        return  DashboardResponse(
             total_users=await self.repo.total_users(),
             total_customers=await self.repo.total_customers(),
             total_property_owners=await self.repo.total_property_owners(),
