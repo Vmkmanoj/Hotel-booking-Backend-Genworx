@@ -39,8 +39,8 @@ from app.common.enums.booking_enums.booking_enums import (
 )
 
 if TYPE_CHECKING:
-    from app.modules.users.models.users import User
-    from app.modules.properties.models.property_model import Property
+    from app.models.users_models.users import User
+    from app.models.property_models.property import Property
     from app.models.booking_models.booking_room import BookingRoom
     from app.models.payment_models.payment import Payment
     from app.models.payment_models.invoice import Invoice

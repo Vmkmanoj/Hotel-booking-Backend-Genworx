@@ -1,8 +1,12 @@
 # ============================================================
-# Third Party
+# Standard Library
 # ============================================================
 
 from uuid import UUID
+
+# ============================================================
+# Third Party
+# ============================================================
 
 from fastapi import (
     APIRouter,
@@ -20,13 +24,14 @@ from app.database.session import get_db
 
 from app.dependencies.auth import get_current_user
 
-from app.modules.users.models.users import User
+from app.models.users_models.users import User
 
 from app.services.booking_services.booking_service import (
     BookingService,
 )
 
 from app.schema.booking_schema.booking_schemas import (
+    BookingMessageResponse,
     BookingResponse,
     BookingSummaryResponse,
     CancelBookingRequest,
@@ -34,7 +39,7 @@ from app.schema.booking_schema.booking_schemas import (
 )
 
 # ============================================================
-# Booking Router
+# Router
 # ============================================================
 
 router = APIRouter(
@@ -42,6 +47,14 @@ router = APIRouter(
     tags=["Bookings"],
 )
 
+# ============================================================
+# Service Dependency
+# ============================================================
+
+def get_booking_service(
+    db: AsyncSession = Depends(get_db),
+) -> BookingService:
+    return BookingService(db)
 
 # ============================================================
 # Create Booking
@@ -54,26 +67,17 @@ router = APIRouter(
 )
 async def create_booking(
     request: CreateBookingRequest,
-    db: AsyncSession = Depends(
-        get_db,
-    ),
-    current_user: User = Depends(
-        get_current_user,
-    ),
+    current_user: User = Depends(get_current_user),
+    service: BookingService = Depends(get_booking_service),
 ) -> BookingResponse:
     """
-    Creates a new booking for the authenticated customer.
+    Create a new booking.
     """
-
-    service = BookingService(
-        db,
-    )
 
     return await service.create_booking(
         request=request,
         current_user=current_user,
     )
-
 
 
 # ============================================================
@@ -86,24 +90,17 @@ async def create_booking(
     status_code=status.HTTP_200_OK,
 )
 async def get_my_bookings(
-    db: AsyncSession = Depends(
-        get_db,
-    ),
-    current_user: User = Depends(
-        get_current_user,
-    ),
+    current_user: User = Depends(get_current_user),
+    service: BookingService = Depends(get_booking_service),
 ) -> list[BookingSummaryResponse]:
     """
-    Retrieves all bookings for the authenticated customer.
+    Retrieve all bookings for the authenticated customer.
     """
-
-    service = BookingService(
-        db,
-    )
 
     return await service.get_my_bookings(
         current_user=current_user,
     )
+
 
 # ============================================================
 # Get Upcoming Bookings
@@ -115,20 +112,12 @@ async def get_my_bookings(
     status_code=status.HTTP_200_OK,
 )
 async def get_upcoming_bookings(
-    db: AsyncSession = Depends(
-        get_db,
-    ),
-    current_user: User = Depends(
-        get_current_user,
-    ),
+    current_user: User = Depends(get_current_user),
+    service: BookingService = Depends(get_booking_service),
 ) -> list[BookingSummaryResponse]:
     """
-    Retrieves all upcoming bookings for the authenticated customer.
+    Retrieve all upcoming bookings.
     """
-
-    service = BookingService(
-        db,
-    )
 
     return await service.get_upcoming_bookings(
         current_user=current_user,
@@ -145,20 +134,12 @@ async def get_upcoming_bookings(
     status_code=status.HTTP_200_OK,
 )
 async def get_completed_bookings(
-    db: AsyncSession = Depends(
-        get_db,
-    ),
-    current_user: User = Depends(
-        get_current_user,
-    ),
+    current_user: User = Depends(get_current_user),
+    service: BookingService = Depends(get_booking_service),
 ) -> list[BookingSummaryResponse]:
     """
-    Retrieves all completed bookings for the authenticated customer.
+    Retrieve all completed bookings.
     """
-
-    service = BookingService(
-        db,
-    )
 
     return await service.get_completed_bookings(
         current_user=current_user,
@@ -176,20 +157,12 @@ async def get_completed_bookings(
 )
 async def get_booking_by_id(
     booking_id: UUID,
-    db: AsyncSession = Depends(
-        get_db,
-    ),
-    current_user: User = Depends(
-        get_current_user,
-    ),
+    current_user: User = Depends(get_current_user),
+    service: BookingService = Depends(get_booking_service),
 ) -> BookingResponse:
     """
-    Retrieves a booking by its ID.
+    Retrieve booking details.
     """
-
-    service = BookingService(
-        db,
-    )
 
     return await service.get_booking_by_id(
         booking_id=booking_id,
@@ -203,25 +176,18 @@ async def get_booking_by_id(
 
 @router.patch(
     "/{booking_id}/cancel",
+    response_model=BookingMessageResponse,
     status_code=status.HTTP_200_OK,
 )
 async def cancel_booking(
     booking_id: UUID,
     request: CancelBookingRequest,
-    db: AsyncSession = Depends(
-        get_db,
-    ),
-    current_user: User = Depends(
-        get_current_user,
-    ),
-) -> dict[str, str]:
+    current_user: User = Depends(get_current_user),
+    service: BookingService = Depends(get_booking_service),
+) -> BookingMessageResponse:
     """
-    Cancels an existing booking.
+    Cancel an existing booking.
     """
-
-    service = BookingService(
-        db,
-    )
 
     await service.cancel_booking(
         booking_id=booking_id,
@@ -229,6 +195,7 @@ async def cancel_booking(
         current_user=current_user,
     )
 
-    return {
-        "message": "Booking cancelled successfully.",
-    }
+    return BookingMessageResponse(
+        success=True,
+        message="Booking cancelled successfully.",
+    )

@@ -67,16 +67,35 @@ class CreateBookingRequest(BaseModel):
         min_length=1,
     )
 
+
+
+class BookingUpdate(BaseModel):
+
+    check_in_date: date | None = None
+
+    check_out_date: date | None = None
+
+    guest_count: int | None = Field(
+        default=None,
+        gt=0,
+    )
+
+    special_requests: str | None = None
+
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
 # ============================================================
 # Booking Room Response
 # ============================================================
 
 class BookingRoomResponse(BaseModel):
-    """
-    Response schema for a booked room.
-    """
 
     room_id: UUID
+
+    room_number: str
+
+    room_type: str
 
     price_per_night: Decimal
 
@@ -222,3 +241,7 @@ class BookingCancellationResponse(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
     )
+
+class BookingMessageResponse(BaseModel):
+    success: bool
+    message: str

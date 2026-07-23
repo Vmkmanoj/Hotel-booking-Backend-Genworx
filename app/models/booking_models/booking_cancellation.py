@@ -27,7 +27,7 @@ from sqlalchemy.orm import (
 # Local Imports
 # ============================================================
 
-from app.database.base_table import BaseModel
+from app.database.base_table import BaseTable
 
 from app.common.enums.booking_enums.booking_enums import (
     CancellationType,
@@ -36,29 +36,15 @@ from app.common.enums.booking_enums.booking_enums import (
 
 if TYPE_CHECKING:
     from app.models.booking_models.booking import Booking
-    from app.modules.users.models.users import User
+    from app.models.users_models.users import User
 
-# ============================================================
-# Local Imports
-# ============================================================
-
-from app.database.base_table import BaseModel
-
-from app.modules.bookings.booking_enums import (
-    CancellationType,
-    RefundStatus,
-)
-
-if TYPE_CHECKING:
-    from app.modules.bookings.models.booking import Booking
-    from app.modules.users.models.users import User
 
 
 # ============================================================
 # Booking Cancellation Model
 # ============================================================
 
-class BookingCancellation(BaseModel):
+class BookingCancellation(BaseTable):
     """
     Stores cancellation information for cancelled bookings.
     """

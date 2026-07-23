@@ -36,7 +36,7 @@ from app.common.enums.payment_enums.payment_enums import (
 )
 
 if TYPE_CHECKING:
-    from app.modules.bookings.models.booking import Booking
+    from app.models.booking_models.booking import Booking
 
 
 # ============================================================
@@ -85,10 +85,15 @@ class Invoice(BaseTable):
         nullable=False,
         default=InvoiceStatus.GENERATED,
     )
-
     invoice_amount: Mapped[Decimal] = mapped_column(
         Numeric(10, 2),
         nullable=False,
+    )
+
+    currency: Mapped[str] = mapped_column(
+        String(10),
+        nullable=False,
+        default="INR",
     )
 
 

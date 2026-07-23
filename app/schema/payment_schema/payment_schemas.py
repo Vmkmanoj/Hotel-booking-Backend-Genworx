@@ -34,7 +34,7 @@ from app.common.enums.payment_enums.payment_enums import (
 
 class CreatePaymentRequest(BaseModel):
     """
-    Request schema for creating a payment.
+    Request schema for initiating a payment.
     """
 
     booking_id: UUID
@@ -42,6 +42,10 @@ class CreatePaymentRequest(BaseModel):
     payment_method: PaymentMethod
 
     payment_gateway: PaymentGateway
+
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
 
 
 # ============================================================
@@ -55,9 +59,14 @@ class VerifyPaymentRequest(BaseModel):
 
     gateway_transaction_id: str = Field(
         min_length=1,
+        max_length=255,
     )
 
     gateway_response: str | None = None
+
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
 
 
 # ============================================================
@@ -77,6 +86,31 @@ class RefundRequest(BaseModel):
         min_length=5,
         max_length=500,
     )
+
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
+
+
+# ============================================================
+# Payment Gateway Response
+# ============================================================
+
+class PaymentGatewayResponse(BaseModel):
+    """
+    Response returned after payment initiation.
+    """
+
+    payment_reference: str
+
+    payment_url: str
+
+    expires_at: datetime | None = None
+
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
+
 
 # ============================================================
 # Payment Summary Response
@@ -105,6 +139,8 @@ class PaymentSummaryResponse(BaseModel):
 
     paid_at: datetime | None
 
+    created_at: datetime
+
     model_config = ConfigDict(
         from_attributes=True,
     )
@@ -116,7 +152,7 @@ class PaymentSummaryResponse(BaseModel):
 
 class PaymentResponse(BaseModel):
     """
-    Detailed response for a payment.
+    Detailed payment response.
     """
 
     id: UUID
@@ -145,9 +181,18 @@ class PaymentResponse(BaseModel):
 
     paid_at: datetime | None
 
+    created_by: UUID | None = None
+
+    updated_by: UUID | None = None
+
+    created_at: datetime
+
+    updated_at: datetime
+
     model_config = ConfigDict(
         from_attributes=True,
     )
+
 
 # ============================================================
 # Invoice Response
@@ -155,7 +200,7 @@ class PaymentResponse(BaseModel):
 
 class InvoiceResponse(BaseModel):
     """
-    Response schema for an invoice.
+    Invoice response.
     """
 
     id: UUID
@@ -168,11 +213,22 @@ class InvoiceResponse(BaseModel):
 
     invoice_amount: Decimal
 
+    currency: str
+
     generated_at: datetime
+
+    created_by: UUID | None = None
+
+    updated_by: UUID | None = None
+
+    created_at: datetime
+
+    updated_at: datetime
 
     model_config = ConfigDict(
         from_attributes=True,
     )
+
 
 # ============================================================
 # Revenue Summary Response
@@ -180,7 +236,7 @@ class InvoiceResponse(BaseModel):
 
 class RevenueSummaryResponse(BaseModel):
     """
-    Revenue summary for a property.
+    Revenue summary for a property owner.
     """
 
     total_payments: int
@@ -190,3 +246,7 @@ class RevenueSummaryResponse(BaseModel):
     total_refunds: Decimal
 
     net_revenue: Decimal
+
+    model_config = ConfigDict(
+        from_attributes=True,
+    )

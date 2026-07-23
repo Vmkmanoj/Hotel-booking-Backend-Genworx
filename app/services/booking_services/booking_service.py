@@ -37,6 +37,8 @@ from app.exceptions.booking_exceptions.booking_exceptions import (
     PropertyNotFoundException,
     RoomNotAvailableException,
     RoomNotFoundException,
+    GuestCapacityExceededException,
+    PropertyNotAvailableException,
 )
 
 from app.common.enums.booking_enums.booking_enums import (
@@ -52,8 +54,12 @@ from app.models.booking_models.booking_history import BookingHistory
 from app.models.booking_models.booking_cancellation import (
     BookingCancellation,
 )
+from app.common.enums.property_enums.property_status import (
+    PropertyStatus,
+)
+from app.common.enums.room_enums.room_status import RoomStatus
 
-from app.modules.users.models.users import User
+from app.models.users_models.users import User
 
 # ============================================================
 # Booking Service
@@ -66,7 +72,7 @@ class BookingService:
         db: AsyncSession,
     ):
 
-        self.repository = BookingRepository(
+        self.repo = BookingRepository(
             db,
         )
 
@@ -112,7 +118,7 @@ class BookingService:
         """
 
         subtotal = sum(
-            room.price_per_night * number_of_nights
+            room.room_type.base_price * number_of_nights
             for room in rooms
         )
 
@@ -155,24 +161,40 @@ class BookingService:
             if request.check_in_date >= request.check_out_date:
                 raise InvalidBookingDatesException()
             
-            property = await self.repository.get_property_by_id(
+            property = await self.repo.get_property_by_id(
                 request.property_id,
             )
 
             if property is None:
                 raise PropertyNotFoundException()
+
+            if property.status != PropertyStatus.APPROVED:
+                raise PropertyNotAvailableException()
             
             room_ids = [
                 room.room_id
                 for room in request.rooms
             ]
 
-            rooms = await self.repository.get_rooms_by_ids(
+            rooms = await self.repo.get_rooms_by_ids(
                 room_ids,
             )
 
             if len(rooms) != len(room_ids):
                 raise RoomNotFoundException()
+
+            for room in rooms:
+
+                if room.room_type.property_id != request.property_id:
+                    raise RoomNotFoundException()
+
+            total_capacity = sum(
+                room.room_type.max_occupancy
+                for room in rooms
+            )
+
+            if request.guest_count > total_capacity:
+                raise GuestCapacityExceededException()
 
             # ============================================================
             # Validate Room Availability
@@ -180,13 +202,16 @@ class BookingService:
 
             for room in rooms:
 
-                is_available = await self.repository.check_room_availability(
+                is_available = await self.repo.check_room_availability(
                     room_id=room.id,
                     check_in_date=request.check_in_date,
                     check_out_date=request.check_out_date,
                 )
 
                 if not is_available:
+                    raise RoomNotAvailableException()
+
+                if room.status != RoomStatus.AVAILABLE:
                     raise RoomNotAvailableException()
                 
             # ============================================================
@@ -246,7 +271,7 @@ class BookingService:
             # Save Booking
             # ============================================================
 
-            booking = await self.repository.create_booking(
+            booking = await self.repo.create_booking(
                 booking,
             )
 
@@ -262,15 +287,15 @@ class BookingService:
                     BookingRoom(
                         booking_id=booking.id,
                         room_id=room.id,
-                        price_per_night=room.price_per_night,
+                        price_per_night=room.room_type.base_price,
                         number_of_nights=number_of_nights,
-                        room_total=room.price_per_night * number_of_nights,
+                        room_total=room.room_type.base_price * number_of_nights,
                         created_by=current_user.id,
                         updated_by=current_user.id,
                     )
                 )
 
-            await self.repository.create_booking_rooms(
+            await self.repo.create_booking_rooms(
                 booking_rooms,
             )
 
@@ -287,7 +312,7 @@ class BookingService:
                 updated_by=current_user.id,
             )
 
-            await self.repository.create_booking_history(
+            await self.repo.create_booking_history(
                 booking_history,
             )
 
@@ -339,7 +364,7 @@ class BookingService:
         Retrieves a booking by its ID.
         """
 
-        booking = await self.repository.get_booking_by_id(
+        booking = await self.repo.get_booking_by_id(
             booking_id,
         )
 
@@ -391,7 +416,7 @@ class BookingService:
         Retrieves all bookings for the authenticated customer.
         """
 
-        bookings = await self.repository.get_customer_bookings(
+        bookings = await self.repo.get_customer_bookings(
             current_user.id,
         )
 
@@ -422,7 +447,7 @@ class BookingService:
         Retrieves all upcoming bookings for the authenticated customer.
         """
 
-        bookings = await self.repository.get_upcoming_bookings(
+        bookings = await self.repo.get_upcoming_bookings(
             customer_id=current_user.id,
             today=date.today(),
         )
@@ -455,7 +480,7 @@ class BookingService:
         Retrieves all completed bookings for the authenticated customer.
         """
 
-        bookings = await self.repository.get_completed_bookings(
+        bookings = await self.repo.get_completed_bookings(
             customer_id=current_user.id,
         )
 
@@ -488,7 +513,7 @@ class BookingService:
         Cancels an existing booking.
         """
 
-        booking = await self.repository.get_booking_by_id(
+        booking = await self.repo.get_booking_by_id(
             booking_id,
         )
 
@@ -536,7 +561,7 @@ class BookingService:
                 updated_by=current_user.id,
             )
 
-            await self.repository.create_booking_cancellation(
+            await self.repo.create_booking_cancellation(
                 cancellation,
             )
 
@@ -553,7 +578,7 @@ class BookingService:
                 updated_by=current_user.id,
             )
 
-            await self.repository.create_booking_history(
+            await self.repo.create_booking_history(
                 history,
             )
 

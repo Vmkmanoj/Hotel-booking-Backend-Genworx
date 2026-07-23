@@ -59,6 +59,13 @@ class Settings(BaseSettings):
 
     REFRESH_TOKEN_EXPIRE_DAYS: int
 
+    ## Origin allowed
+    ALLOWED_ORIGINS: list[str] = Field(
+        default_factory=lambda: [
+            "http://localhost:5173",
+        ]
+    )
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -101,3 +101,26 @@ class BookingAccessDeniedException(HTTPException):
             status_code=HTTP_403_FORBIDDEN,
             detail="You are not authorized to access this booking.",
         )
+
+class GuestCapacityExceededException(HTTPException):
+    """
+    Raised when the total guest count exceeds
+    the maximum occupancy of the selected rooms.
+    """
+
+    def __init__(self):
+        super().__init__(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail="Guest count exceeds the maximum occupancy of the selected room(s).",
+        )
+
+class PropertyNotAvailableException(HTTPException):
+    """
+    Raised when the property exists but is not available for booking.
+    """
+
+    def __init__(self):
+        super().__init__(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail="This property is not available for booking.",
+        )

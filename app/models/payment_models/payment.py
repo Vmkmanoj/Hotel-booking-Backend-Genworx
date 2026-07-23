@@ -41,7 +41,7 @@ from app.common.enums.payment_enums.payment_enums import (
 
 if TYPE_CHECKING:
     from app.models.booking_models.booking import Booking
-    from app.modules.users.models.users import User
+    from app.models.users_models.users import User
 
 # ============================================================
 # Payment Model

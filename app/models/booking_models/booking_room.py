@@ -30,7 +30,7 @@ from app.database.base_table import BaseTable
 
 if TYPE_CHECKING:
     from app.models.booking_models.booking import Booking
-    from app.modules.rooms.models.room import Room
+    from app.models.rooms_models.room import Room
     
 # ============================================================
 # Booking Room Model

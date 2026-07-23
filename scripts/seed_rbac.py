@@ -27,7 +27,7 @@ from app.modules.auth.auth_constants import (
     PROPERTY_OWNER,
     CUSTOMER,
 )
-from app.common.enums.user_status import UserStatus
+from app.common.enums.user_enums.user_status import UserStatus
 
 
 # ============================================================

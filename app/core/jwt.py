@@ -11,6 +11,9 @@ from uuid import UUID
 
 from jose import JWTError, jwt
 
+# FastAPI exceptions/status
+from fastapi import HTTPException, status
+
 # ============================================================
 # Local Imports
 # ============================================================
@@ -113,3 +116,45 @@ def decode_token(
         settings.SECRET_KEY,
         algorithms=[settings.ALGORITHM],
     )
+
+
+# ============================================================
+# Verify Access Token
+# ============================================================
+
+def verify_access_token(
+    token: str,
+) -> dict:
+    """
+    Verify an access token and return its payload.
+
+    Args:
+        token: JWT access token.
+
+    Returns:
+        Decoded JWT payload.
+
+    Raises:
+        HTTPException:
+            If the token is invalid,
+            expired,
+            or not an access token.
+    """
+
+    try:
+
+        payload = decode_token(token)
+
+        if payload.get("type") != ACCESS_TOKEN_TYPE:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid access token.",
+            )
+
+        return payload
+
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token.",
+        )

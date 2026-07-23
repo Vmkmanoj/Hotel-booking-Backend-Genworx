@@ -13,10 +13,12 @@ from sqlalchemy import (
     and_,
     select,
 )
+from sqlalchemy.exc import SQLAlchemyError
 
 from sqlalchemy.orm import (
     joinedload,
 )
+
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -29,8 +31,8 @@ from app.models.booking_models.booking_room import BookingRoom
 from app.models.booking_models.booking_history import BookingHistory
 from app.models.booking_models.booking_cancellation import BookingCancellation
 
-from app.modules.properties.models.property_model import Property
-from app.modules.rooms.models.room_model import Room
+from app.models.property_models.property import Property
+from app.models.rooms_models.room import Room
 
 from app.common.enums.booking_enums.booking_enums import (
     BookingStatus,
@@ -57,13 +59,17 @@ class BookingRepository:
         property_id: UUID,
     ) -> Property | None:
 
-        result = await self.db.execute(
-            select(Property).where(
-                Property.id == property_id,
+        try:
+            result = await self.db.execute(
+                select(Property).where(
+                    Property.id == property_id,
+                )
             )
-        )
 
-        return result.scalar_one_or_none()
+            return result.scalar_one_or_none()
+
+        except SQLAlchemyError:
+            raise
     
     # ============================================================
     # Room Queries
@@ -92,13 +98,17 @@ class BookingRepository:
         booking: Booking,
     ) -> Booking:
 
-        self.db.add(booking)
+        try:
+            self.db.add(booking)
 
-        await self.db.flush()
+            await self.db.flush()
+            await self.db.refresh(booking)
 
-        await self.db.refresh(booking)
+            return booking
 
-        return booking
+        except SQLAlchemyError:
+            await self.db.rollback()
+            raise
     
     # ============================================================
     # Room Queries
@@ -110,8 +120,12 @@ class BookingRepository:
     ) -> list[Room]:
 
         result = await self.db.execute(
-            select(Room).where(
-                Room.id.in_(room_ids),
+            select(Room)
+            .options(
+                joinedload(Room.room_type)
+            )
+            .where(
+                Room.id.in_(room_ids)
             )
         )
 
@@ -126,12 +140,16 @@ class BookingRepository:
         self,
         booking_rooms: list[BookingRoom],
     ) -> None:
+        try:
+            self.db.add_all(
+                booking_rooms,
+            )
 
-        self.db.add_all(
-            booking_rooms,
-        )
+            await self.db.flush()
 
-        await self.db.flush()
+        except SQLAlchemyError:
+            await self.db.rollback()
+            raise
 
     # ============================================================
     # Booking History Commands
@@ -141,12 +159,15 @@ class BookingRepository:
         self,
         booking_history: BookingHistory,
     ) -> None:
+        try:
+            self.db.add(
+                booking_history,
+            )
 
-        self.db.add(
-            booking_history,
-        )
-
-        await self.db.flush()
+            await self.db.flush()
+        except SQLAlchemyError:
+            await self.db.rollback()
+            raise
 
 
     # ============================================================
@@ -199,12 +220,16 @@ class BookingRepository:
         self,
         booking_cancellation: BookingCancellation,
     ) -> None:
+        try:
+            self.db.add(
+                booking_cancellation,
+            )
 
-        self.db.add(
-            booking_cancellation,
-        )
+            await self.db.flush()
 
-        await self.db.flush()
+        except SQLAlchemyError:
+            await self.db.rollback()
+            raise
 
     # ============================================================
     # Availability Queries
@@ -225,10 +250,11 @@ class BookingRepository:
             )
             .where(
                 BookingRoom.room_id == room_id,
-                Booking.booking_status.notin_(
+                Booking.booking_status.in_(
                     [
-                        "CANCELLED",
-                        "COMPLETED",
+                        BookingStatus.PENDING,
+                        BookingStatus.CONFIRMED,
+                        BookingStatus.CHECKED_IN,
                     ]
                 ),
                 and_(
@@ -285,3 +311,28 @@ class BookingRepository:
         )
 
         return list(result.scalars().all())
+
+    async def get_booking_details(
+        self,
+        booking_id: UUID,
+    ) -> Booking | None:
+        """
+        Retrieve a booking with its associated rooms.
+        """
+        try:
+            result = await self.db.execute(
+                select(Booking)
+                .options(
+                    joinedload(Booking.booking_rooms)
+                    .joinedload(BookingRoom.room)
+                    .joinedload(Room.room_type)
+                )
+                .where(
+                    Booking.id == booking_id,
+                )
+            )
+
+            return result.scalar_one_or_none()
+
+        except SQLAlchemyError:
+            raise

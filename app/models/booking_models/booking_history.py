@@ -33,7 +33,7 @@ from app.common.enums.booking_enums.booking_enums import (
 
 if TYPE_CHECKING:
     from app.models.booking_models.booking import Booking
-    from app.modules.users.models.users import User
+    from app.models.users_models.users import User
 
 # ============================================================
 # Booking History Model
