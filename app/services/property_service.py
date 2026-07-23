@@ -51,7 +51,7 @@ class PropertyService:
                 updated_by=str(property_data.owner_id),
             )
 
-            property = await PropertyRepository.create(
+            property_created = await PropertyRepository.create(
                 db=db,
                 address=address,
                 property_obj=property_obj
@@ -59,7 +59,7 @@ class PropertyService:
 
             return {
                 "message": "Property created successfully.",
-                "data": property
+                "data": property_created
             }
 
         except Exception as e:
@@ -168,7 +168,7 @@ class PropertyService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to update property."
             )
-        
+
     @staticmethod
     async def archive_property(
         db: AsyncSession,
@@ -238,7 +238,6 @@ class PropertyService:
                     detail="You are not authorized to submit this property."
                 )
 
-            # Optional Business Rule
             if property_obj.status == "Archived":
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,

@@ -65,6 +65,8 @@ class SuperAdminPropertyRepository:
 
         property.status = PropertyStatus.APPROVED.value
         property.is_verified = True
+        property.approval_remarks = remarks
+        property.approved_by = admin_id
 
         await self.db.commit()
         await self.db.refresh(property)

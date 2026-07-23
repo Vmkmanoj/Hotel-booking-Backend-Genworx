@@ -1,10 +1,12 @@
 from uuid import UUID
 
+from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.property import Property
+from app.models.address import Address
 from app.schema.property_schema import PropertyUpdate
 from app.models.address import Address
 
@@ -66,11 +68,13 @@ class PropertyRepository:
     async def update(
         db: AsyncSession,
         property_obj: Property,
-        property_data: PropertyUpdate
+        property_data: PropertyUpdate,
     ):
         try:
 
-            update_data = property_data.model_dump(exclude_unset=True)
+            update_data = property_data.model_dump(
+                exclude_unset=True
+            )
 
             for key, value in update_data.items():
                 setattr(property_obj, key, value)

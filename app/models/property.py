@@ -1,17 +1,7 @@
 import uuid
 import enum
 
-from sqlalchemy import (
-    Column,
-    String,
-    Boolean,
-    DateTime,
-    Time,
-    Text,
-    ForeignKey,
-    DECIMAL,
-    Integer,
-)
+from sqlalchemy import Column,String,Boolean,DateTime, Time, Text, ForeignKey, DECIMAL, Integer, Enum
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
